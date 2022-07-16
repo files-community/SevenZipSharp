@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net45</TargetFrameworks>
+    <TargetFrameworks>net48</TargetFrameworks>
     <AssemblyTitle>SevenZip.Tests</AssemblyTitle>
     <Product>SevenZipTests</Product>
     <Copyright>Copyright © Joel Ahlgren 2021</Copyright>
@@ -8,13 +8,14 @@
     <OutputPath>..\Stage\$(Configuration)\</OutputPath>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>SevenZipTests.snk</AssemblyOriginatorKeyFile>
-    <Configurations>Debug;Release;LiteDebug;LiteRelease</Configurations>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>x86</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>SFX</DefineConstants>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <DefineConstants />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>SFX</DefineConstants>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <DefineConstants />
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>

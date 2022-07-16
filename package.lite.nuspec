@@ -17,23 +17,14 @@
 			Fixed issue with exception handling in asynchronous compression and extraction methods, thanks to GitHub user kikijiki.
 		</releaseNotes>
 		<dependencies>
-			<group targetFramework="net45" />
 			<group targetFramework="netstandard2.0">
 				<dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
 				<dependency id="System.Security.Permissions" version="4.5.0" />
 			</group>
-			<group targetFramework="netcoreapp3.1">
-				<dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
-			</group>
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="Stage\LiteRelease\netstandard2.0\SevenZipSharp.dll" target="lib\netstandard2.0" />
-		<file src="Stage\LiteRelease\netstandard2.0\SevenZipSharp.xml" target="lib\netstandard2.0" />
-		<file src="Stage\LiteRelease\netcoreapp3.1\SevenZipSharp.dll" target="lib\netcoreapp3.1" />
-		<file src="Stage\LiteRelease\netcoreapp3.1\SevenZipSharp.xml" target="lib\netcoreapp3.1" />
-		<file src="Stage\LiteRelease\net45\SevenZipSharp.dll" target="lib\net45" />
-		<file src="Stage\LiteRelease\net45\SevenZipSharp.xml" target="lib\net45" />
+		<file src="SevenZip\bin\Release\netstandard2.0\SevenZip.dll" target="lib\netstandard2.0" />
 		<file src="license" />
 	</files>
 </package>
