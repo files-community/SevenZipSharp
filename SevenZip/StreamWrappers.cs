@@ -304,20 +304,9 @@ namespace SevenZip
 
         public void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
         {
-            long absolutePosition;
-            switch (seekOrigin) {
-                case SeekOrigin.Begin:
-                    absolutePosition = offset;
-                    break;
-                case SeekOrigin.Current:
-                    absolutePosition = Position + offset;
-                    break;
-                case SeekOrigin.End:
-                    absolutePosition = Length + offset;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(seekOrigin));
-            }
+            long absolutePosition = (seekOrigin == SeekOrigin.Current)
+                                        ? Position + offset
+                                        : offset;
             CurrentStream = StreamNumberByOffset(absolutePosition);
             long delta = Streams[CurrentStream].Seek(
                 absolutePosition - StreamOffsets[CurrentStream].Key, SeekOrigin.Begin);

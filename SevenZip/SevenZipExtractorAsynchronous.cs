@@ -27,14 +27,15 @@ namespace SevenZip
                 {
                     backupFileName = _fileName;
                 }
-                CommonDispose();
+                CommonDispose(String.IsNullOrEmpty(_fileName));
                 if (backupStream == null)
                 {
                     Init(backupFileName);
                 }
                 else
                 {
-                    Init(backupStream);
+
+                    Init(backupStream, backupStream is ArchiveEmulationStreamProxy aesp ? aesp.LeaveOpen : false);
                 }
             }
         }

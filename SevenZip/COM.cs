@@ -30,6 +30,14 @@
     [StructLayout(LayoutKind.Explicit)]
     internal struct PropVariant
     {
+        [DllImport("api-ms-win-core-com-l1-1-1.dll")]
+        private static extern int PropVariantClear(ref PropVariant pvar);
+
+        [DllImport("propsys.dll")]
+        private static extern int PropVariantToWinRTPropertyValue(ref PropVariant pvar, Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object ppv);
+
+        private static readonly Guid IPropertyValueGuid = Guid.ParseExact("{4bd682dd-7554-40e9-9a9b-82654ede7e62}", "B"); // typeof(IPropertyValue).GUID
+
         [FieldOffset(0)] private ushort _vt;
 
         /// <summary>
@@ -142,32 +150,8 @@
                             return DateTime.MinValue;
                         }
                     default:
-                        var propHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
-                        
-                        try
-                        {
-                            return Marshal.GetObjectForNativeVariant(propHandle.AddrOfPinnedObject());
-                        }
-                        catch (NotSupportedException)
-                        {
-                            switch (VarType)
-                            {
-                                case VarEnum.VT_UI8:
-                                    return UInt64Value;
-                                case VarEnum.VT_UI4:
-                                    return UInt32Value;
-                                case VarEnum.VT_I8:
-                                    return Int64Value;
-                                case VarEnum.VT_I4:
-                                    return Int32Value;
-                                default:
-                                    return 0;
-                            }
-                        }
-                        finally
-                        {
-                            propHandle.Free();
-                        }
+                        PropVariantToWinRTPropertyValue(ref this, IPropertyValueGuid, out var ppv);
+                        return ppv;
                 }
             }
         }
