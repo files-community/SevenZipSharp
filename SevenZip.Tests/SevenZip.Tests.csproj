@@ -4,8 +4,6 @@
     <AssemblyTitle>SevenZip.Tests</AssemblyTitle>
     <Product>SevenZipTests</Product>
     <Copyright>Copyright © Joel Ahlgren 2021</Copyright>
-    <IntermediateOutputPath>..\Stage\obj\$(Configuration)\</IntermediateOutputPath>
-    <OutputPath>..\Stage\$(Configuration)\</OutputPath>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>SevenZipTests.snk</AssemblyOriginatorKeyFile>
     <Configurations>Debug;Release</Configurations>

@@ -34,8 +34,7 @@ namespace SevenZip
                 }
                 else
                 {
-
-                    Init(backupStream, backupStream is ArchiveEmulationStreamProxy aesp ? aesp.LeaveOpen : false);
+                    Init(backupStream);
                 }
             }
         }

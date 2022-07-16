@@ -102,7 +102,7 @@ namespace SevenZip
         /// General initialization function.
         /// </summary>
         /// <param name="stream">The stream to read the archive from.</param>
-        private void Init(Stream stream, bool leaveOpen)
+        private void Init(Stream stream)
         {
             ValidateStream(stream);
             var isExecutable = false;
@@ -110,14 +110,14 @@ namespace SevenZip
             if ((int)_format == -1)
             {
                 _format = FileChecker.CheckSignature(stream, out _offset, out isExecutable);
-            }
+            }            
             
             PreserveDirectoryStructure = true;
             SevenZipLibraryManager.LoadLibrary(this, _format);
             
             try
             {
-                _inStream = new ArchiveEmulationStreamProxy(stream, _offset, leaveOpen);
+                _inStream = new ArchiveEmulationStreamProxy(stream, _offset);
 				_packedSize = stream.Length;
                 _archive = SevenZipLibraryManager.InArchive(_format, this);
             }
@@ -136,7 +136,7 @@ namespace SevenZip
                     
                     try
                     {
-                        _inStream = new ArchiveEmulationStreamProxy(stream, _offset, leaveOpen);
+                        _inStream = new ArchiveEmulationStreamProxy(stream, _offset);
                         _packedSize = stream.Length;
                         _archive = SevenZipLibraryManager.InArchive(_format, this);
                     }
@@ -155,9 +155,9 @@ namespace SevenZip
         /// <param name="archiveStream">The stream to read the archive from.
         /// Use SevenZipExtractor(string) to extract from disk, though it is not necessary.</param>
         /// <remarks>The archive format is guessed by the signature.</remarks>
-        public SevenZipExtractor(Stream archiveStream, bool leaveOpen = false)
+        public SevenZipExtractor(Stream archiveStream)
         {
-            Init(archiveStream, leaveOpen);
+            Init(archiveStream);
         }
 
         /// <summary>
@@ -168,10 +168,10 @@ namespace SevenZip
         /// <param name="format">Manual archive format setup. You SHOULD NOT normally specify it this way.
         /// Instead, use SevenZipExtractor(Stream archiveStream), that constructor
         /// automatically detects the archive format.</param>
-        public SevenZipExtractor(Stream archiveStream, InArchiveFormat format, bool leaveOpen = false)
+        public SevenZipExtractor(Stream archiveStream, InArchiveFormat format)
         {
             _format = format;
-            Init(archiveStream, leaveOpen);
+            Init(archiveStream);
         }
 
         /// <summary>
@@ -228,10 +228,10 @@ namespace SevenZip
         /// <param name="archiveStream">The stream to read the archive from.</param>
         /// <param name="password">Password for an encrypted archive.</param>
         /// <remarks>The archive format is guessed by the signature.</remarks>
-        public SevenZipExtractor(Stream archiveStream, string password, bool leaveOpen = false)
+        public SevenZipExtractor(Stream archiveStream, string password)
             : base(password)
         {
-            Init(archiveStream, leaveOpen);
+            Init(archiveStream);
         }
 
         /// <summary>
@@ -242,11 +242,11 @@ namespace SevenZip
         /// <param name="format">Manual archive format setup. You SHOULD NOT normally specify it this way.
         /// Instead, use SevenZipExtractor(Stream archiveStream, string password), that constructor
         /// automatically detects the archive format.</param>
-        public SevenZipExtractor(Stream archiveStream, string password, InArchiveFormat format, bool leaveOpen = false)
+        public SevenZipExtractor(Stream archiveStream, string password, InArchiveFormat format)
             : base(password)
         {
             _format = format;
-            Init(archiveStream, leaveOpen);
+            Init(archiveStream);
         }
 
         #endregion
@@ -356,7 +356,7 @@ namespace SevenZip
         /// </summary>
         public bool PreserveDirectoryStructure { get; set; }
         
-        #endregion
+        #endregion                
 
         /// <summary>
         /// Checked whether the class was disposed.
@@ -447,7 +447,7 @@ namespace SevenZip
             {
                 if (OpenArchiveInner(archiveStream, openCallback) != OperationResult.Ok)
                 {
-                    //if (!ThrowException(null, new SevenZipArchiveException()))
+                    if (!ThrowException(null, new SevenZipArchiveException()))
                     {
                         return false;
                     }
@@ -499,7 +499,7 @@ namespace SevenZip
                         
                         try
                         {
-        #region Getting archive items data
+                            #region Getting archive items data
 
                             for (uint i = 0; i < _filesCount; i++)
                             {
@@ -540,9 +540,9 @@ namespace SevenZip
                                 }
                             }
 
-        #endregion
+                            #endregion
 
-        #region Getting archive properties
+                            #region Getting archive properties
 
                             var numProps = _archive.GetNumberOfArchiveProperties();
                             var archProps = new List<ArchiveProperty>((int)numProps);
@@ -584,7 +584,7 @@ namespace SevenZip
                                 _isSolid = true;
                             }
 
-        #endregion
+                            #endregion
                         }
                         catch (Exception)
                         {
@@ -705,7 +705,7 @@ namespace SevenZip
             callback.FileExists -= FileExistsEventProxy;
         }
 
-        #endregion
+        #endregion        
 #endif
 
         /// <summary>
@@ -750,9 +750,9 @@ namespace SevenZip
             _archiveFileData = null;
             _archiveProperties = null;
             _archiveFileInfoCollection = null;
-            
-	        if (_inStream != null && !preventDispose)
-	        {
+
+            if (_inStream != null && !preventDispose)
+            {
                 _inStream.Dispose();
                 _inStream = null;
 	        }

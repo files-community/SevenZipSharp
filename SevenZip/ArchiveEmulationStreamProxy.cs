@@ -8,8 +8,6 @@
     /// </summary>
     internal class ArchiveEmulationStreamProxy : Stream, IDisposable
     {
-        public bool LeaveOpen { get; }
-
         /// <summary>
         /// Gets the file offset.
         /// </summary>
@@ -25,12 +23,11 @@
         /// </summary>
         /// <param name="stream">The stream to wrap.</param>
         /// <param name="offset">The stream offset.</param>
-        public ArchiveEmulationStreamProxy(Stream stream, int offset, bool leaveOpen = false)
+        public ArchiveEmulationStreamProxy(Stream stream, int offset)
         {
             Source = stream;
             Offset = offset;
             Source.Position = offset;
-            LeaveOpen = leaveOpen;
         }
 
         public override bool CanRead => Source.CanRead;
@@ -75,18 +72,12 @@
 
         public new void Dispose()
         {
-            if (!LeaveOpen)
-            {
-                Source.Dispose();
-            }
+            Source.Dispose();
         }
 
         public override void Close()
         {
-            if (!LeaveOpen)
-            {
-                Source.Close();
-            }
+            Source.Close();
         }
     }
 }

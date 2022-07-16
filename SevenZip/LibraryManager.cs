@@ -49,11 +49,7 @@ namespace SevenZip
                 throw new SevenZipLibraryException("DLL file does not exist.");
             }
 
-#if WINDOWS_UWP
             return Environment.Is64BitProcess ? "7z64.dll" : "7z.dll";
-#else
-            return absolutePath;
-#endif
         }
 
         /// <summary>
@@ -126,11 +122,7 @@ namespace SevenZip
                         _libraryFileName = DetermineLibraryFilePath();
                     }
 
-#if WINDOWS_UWP
                     if ((_modulePtr = NativeMethods.LoadPackagedLibrary(_libraryFileName)) == IntPtr.Zero)
-#else
-                    if ((_modulePtr = NativeMethods.LoadLibrary(_libraryFileName)) == IntPtr.Zero)
-#endif
                     {
                         throw new SevenZipLibraryException($"failed to load library from \"{_libraryFileName}\".");
                     }
