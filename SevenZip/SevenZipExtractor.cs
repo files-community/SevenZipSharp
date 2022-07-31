@@ -48,6 +48,8 @@ namespace SevenZip
         /// </summary>
         private bool _asynchronousDisposeLock;
 
+        private bool _leaveOpen;
+
         #region Constructors
 
         /// <summary>
@@ -117,7 +119,7 @@ namespace SevenZip
             
             try
             {
-                _inStream = new ArchiveEmulationStreamProxy(stream, _offset);
+                _inStream = new ArchiveEmulationStreamProxy(stream, _offset, _leaveOpen);
 				_packedSize = stream.Length;
                 _archive = SevenZipLibraryManager.InArchive(_format, this);
             }
@@ -136,7 +138,7 @@ namespace SevenZip
                     
                     try
                     {
-                        _inStream = new ArchiveEmulationStreamProxy(stream, _offset);
+                        _inStream = new ArchiveEmulationStreamProxy(stream, _offset, _leaveOpen);
                         _packedSize = stream.Length;
                         _archive = SevenZipLibraryManager.InArchive(_format, this);
                     }
@@ -160,6 +162,12 @@ namespace SevenZip
             Init(archiveStream);
         }
 
+        public SevenZipExtractor(Stream archiveStream, bool leaveOpen)
+        {
+            _leaveOpen = leaveOpen;
+            Init(archiveStream);
+        }
+
         /// <summary>
         /// Initializes a new instance of SevenZipExtractor class.
         /// </summary>
@@ -170,6 +178,13 @@ namespace SevenZip
         /// automatically detects the archive format.</param>
         public SevenZipExtractor(Stream archiveStream, InArchiveFormat format)
         {
+            _format = format;
+            Init(archiveStream);
+        }
+
+        public SevenZipExtractor(Stream archiveStream, InArchiveFormat format, bool leaveOpen)
+        {
+            _leaveOpen = leaveOpen;
             _format = format;
             Init(archiveStream);
         }
@@ -234,6 +249,13 @@ namespace SevenZip
             Init(archiveStream);
         }
 
+        public SevenZipExtractor(Stream archiveStream, string password, bool leaveOpen)
+            : base(password)
+        {
+            _leaveOpen = leaveOpen;
+            Init(archiveStream);
+        }
+
         /// <summary>
         /// Initializes a new instance of SevenZipExtractor class.
         /// </summary>
@@ -246,6 +268,14 @@ namespace SevenZip
             : base(password)
         {
             _format = format;
+            Init(archiveStream);
+        }
+
+        public SevenZipExtractor(Stream archiveStream, string password, InArchiveFormat format, bool leaveOpen)
+            : base(password)
+        {
+            _format = format;
+            _leaveOpen = leaveOpen;
             Init(archiveStream);
         }
 
@@ -408,7 +438,7 @@ namespace SevenZip
                     _archiveStream = new InStreamWrapper(
                         new ArchiveEmulationStreamProxy(new FileStream(
                             _fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                            _offset),
+                            _offset, _leaveOpen),
                         dispose);
                 }
                 else
@@ -773,9 +803,9 @@ namespace SevenZip
                 {
                     try
                     {
-                        if (_archiveStream is DisposeVariableWrapper)
+                        if (_archiveStream is DisposeVariableWrapper dvw)
                         {
-                            (_archiveStream as DisposeVariableWrapper).DisposeStream = finalDispose;
+                            dvw.DisposeStream = finalDispose;
                         }
 
                         (_archiveStream as IDisposable).Dispose();
@@ -1100,6 +1130,8 @@ namespace SevenZip
                         CheckedExecute(
                             _archive.Extract(indexes, (uint) indexes.Length, 0, aec),
                             SevenZipExtractionFailedException.DEFAULT_MESSAGE, aec);
+                        _archive.Close();
+                        _opened = false;
                     }
                     finally
                     {

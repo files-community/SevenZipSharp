@@ -22,13 +22,15 @@
         private delegate void CompressDirectory2Delegate(string directory, Stream archiveStream, string password, string searchPattern, bool recursion);
 
         private delegate void CompressStreamDelegate(Stream inStream, Stream outStream, string password);
+        private delegate void CompressStreamDictionaryDelegate(Stream archiveStream, IDictionary<string, Stream> streamDictionary, string password, Stream tempStream);
 
-        private delegate void ModifyArchiveDelegate(string archiveName, IDictionary<int, string> newFileNames, string password);
+        private delegate void ModifyArchive1Delegate(string archiveName, IDictionary<int, string> newFileNames, string password);
+        private delegate void ModifyArchive2Delegate(Stream archiveStream, IDictionary<int, string> newFileNames, string password, Stream tempStream);
 
         #endregion
 
         #region BeginCompressFiles overloads
-        
+
         /// <summary>
         /// Packs files into the archive asynchronously.
         /// </summary>
@@ -421,6 +423,19 @@
             }
         }
 
+        public async Task CompressStreamDictionaryAsync(Stream archiveStream, IDictionary<string, Stream> streamDictionary, string password = "", Stream tempStream = null)
+        {
+            try
+            {
+                SaveContext();
+                await Task.Run(() => new CompressStreamDictionaryDelegate(CompressStreamDictionary).Invoke(archiveStream, streamDictionary, password, tempStream));
+            }
+            finally
+            {
+                ReleaseContext();
+            }
+        }
+
         #endregion
 
         #region BeginModifyArchive overloads
@@ -434,7 +449,20 @@
         public void BeginModifyArchive(string archiveName, IDictionary<int, string> newFileNames, string password = "")
         {
             SaveContext();
-            Task.Run(() => new ModifyArchiveDelegate(ModifyArchive).Invoke(archiveName, newFileNames, password))
+            Task.Run(() => new ModifyArchive1Delegate(ModifyArchive).Invoke(archiveName, newFileNames, password))
+                .ContinueWith(_ => ReleaseContext());
+        }
+
+        /// <summary>
+        /// Modifies the existing archive asynchronously (renames files or deletes them).
+        /// </summary>
+        /// <param name="archiveStream">The archive file stream.</param>
+        /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
+        /// <param name="password">The archive password.</param>
+        public void BeginModifyArchive(Stream archiveStream, IDictionary<int, string> newFileNames, string password = "", Stream tempStream = null)
+        {
+            SaveContext();
+            Task.Run(() => new ModifyArchive2Delegate(ModifyArchive).Invoke(archiveStream, newFileNames, password, tempStream))
                 .ContinueWith(_ => ReleaseContext());
         }
 
@@ -453,7 +481,26 @@
             try
             {
                 SaveContext();
-                await Task.Run(() => new ModifyArchiveDelegate(ModifyArchive).Invoke(archiveName, newFileNames, password));
+                await Task.Run(() => new ModifyArchive1Delegate(ModifyArchive).Invoke(archiveName, newFileNames, password));
+            }
+            finally
+            {
+                ReleaseContext();
+            }
+        }
+
+        /// <summary>
+        /// Modifies the existing archive asynchronously (renames files or deletes them).
+        /// </summary>
+        /// <param name="archiveStream">The archive file stream.</param>
+        /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
+        /// <param name="password">The archive password.</param>
+        public async Task ModifyArchiveAsync(Stream archiveStream, IDictionary<int, string> newFileNames, string password = "", Stream tempStream = null)
+        {
+            try
+            {
+                SaveContext();
+                await Task.Run(() => new ModifyArchive2Delegate(ModifyArchive).Invoke(archiveStream, newFileNames, password, tempStream));
             }
             finally
             {

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <AssemblyName>SevenZipSharp</AssemblyName>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
     <Configurations>Debug;Release</Configurations>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Joel Ahlgren</Authors>
