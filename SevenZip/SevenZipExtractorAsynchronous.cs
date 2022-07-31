@@ -27,7 +27,7 @@ namespace SevenZip
                 {
                     backupFileName = _fileName;
                 }
-                CommonDispose(String.IsNullOrEmpty(_fileName));
+                CommonDispose();
                 if (backupStream == null)
                 {
                     Init(backupFileName);

@@ -734,7 +734,7 @@ namespace SevenZip
 
         #region IDisposable Members
 
-        private void CommonDispose(bool preventDispose = false)
+        private void CommonDispose(bool finalDispose = false)
         {
             if (_opened)
             {
@@ -751,12 +751,12 @@ namespace SevenZip
             _archiveProperties = null;
             _archiveFileInfoCollection = null;
 
-            if (_inStream != null && !preventDispose)
+            if (_inStream != null && finalDispose)
             {
                 _inStream.Dispose();
                 _inStream = null;
 	        }
-                
+
 	        if (_openCallback != null)
             {
                 try
@@ -766,7 +766,7 @@ namespace SevenZip
                 catch (ObjectDisposedException) { }
                 _openCallback = null;
             }
-            
+
             if (_archiveStream != null)
             {
                 if (_archiveStream is IDisposable)
@@ -775,7 +775,7 @@ namespace SevenZip
                     {
                         if (_archiveStream is DisposeVariableWrapper)
                         {
-                            (_archiveStream as DisposeVariableWrapper).DisposeStream = !preventDispose;
+                            (_archiveStream as DisposeVariableWrapper).DisposeStream = finalDispose;
                         }
 
                         (_archiveStream as IDisposable).Dispose();
@@ -800,7 +800,7 @@ namespace SevenZip
 
             if (!_disposed)
             {                
-                CommonDispose();
+                CommonDispose(finalDispose: true);
             }
 
             _disposed = true;            
