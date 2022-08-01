@@ -8,7 +8,6 @@ namespace SevenZip
     using System.Security.Permissions;
 #endif
     using System.IO;
-    using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Text;
 
@@ -37,18 +36,6 @@ namespace SevenZip
 
         private static string DetermineLibraryFilePath()
         {
-            if (string.IsNullOrEmpty(typeof(SevenZipLibraryManager).GetTypeInfo().Assembly.Location))
-            {
-                return null;
-            }
-
-            var absolutePath = Path.Combine(Path.GetDirectoryName(typeof(SevenZipLibraryManager).GetTypeInfo().Assembly.Location), Environment.Is64BitProcess ? "7z64.dll" : "7z.dll");
-
-            if (!File.Exists(absolutePath))
-            {
-                throw new SevenZipLibraryException("DLL file does not exist.");
-            }
-
             return Environment.Is64BitProcess ? "7z64.dll" : "7z.dll";
         }
 
