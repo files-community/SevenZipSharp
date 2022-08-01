@@ -1130,8 +1130,6 @@ namespace SevenZip
                         CheckedExecute(
                             _archive.Extract(indexes, (uint) indexes.Length, 0, aec),
                             SevenZipExtractionFailedException.DEFAULT_MESSAGE, aec);
-                        _archive.Close();
-                        _opened = false;
                     }
                     finally
                     {
