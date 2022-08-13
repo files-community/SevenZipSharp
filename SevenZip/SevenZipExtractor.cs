@@ -1144,6 +1144,11 @@ namespace SevenZip
                     throw;
                 }
             }
+            finally
+            {
+                _archive?.Close();
+                _opened = false;
+            }
 
             OnEvent(ExtractionFinished, EventArgs.Empty, false);
             ThrowUserException();
