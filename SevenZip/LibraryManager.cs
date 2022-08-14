@@ -305,7 +305,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="user">Caller of the function</param>
         /// <param name="format">Archive format</param>
-        public static void FreeLibrary(object user, Enum format)
+        public static void FreeLibrary(object user, Enum format, bool isIntermediate = false)
         {
 #if NET45 || NETSTANDARD2_0
             var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
@@ -359,7 +359,7 @@ namespace SevenZip
                         }
                     }
 
-                    if ((_inArchives == null || _inArchives.Count == 0) && (_outArchives == null || _outArchives.Count == 0))
+                    if ((_inArchives == null || _inArchives.Count == 0) && (_outArchives == null || _outArchives.Count == 0) && !isIntermediate)
                     {
                         _inArchives = null;
                         _outArchives = null;
@@ -493,4 +493,4 @@ namespace SevenZip
         }
     }
 #endif
-}
+                }

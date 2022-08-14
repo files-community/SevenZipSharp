@@ -816,7 +816,7 @@ namespace SevenZip
                 }
             }
 
-            SevenZipLibraryManager.FreeLibrary(this, _format);
+            SevenZipLibraryManager.FreeLibrary(this, _format, !finalDispose);
         }
 
         /// <summary>
