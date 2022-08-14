@@ -17,21 +17,14 @@ namespace SevenZip
         private readonly int _uniqueID;
         private static readonly List<int> Identifiers = new List<int>();
 
-        /// <summary>
-        /// True if the instance of the class needs to be recreated in new thread context; otherwise, false.
-        /// </summary>
-        protected internal bool NeedsToBeRecreated;
-
         internal virtual void SaveContext()
         {
             Context = SynchronizationContext.Current;
-            NeedsToBeRecreated = true;
         }
 
         internal virtual void ReleaseContext()
         {
             Context = null;
-            NeedsToBeRecreated = true;
             GC.SuppressFinalize(this);
         }
 

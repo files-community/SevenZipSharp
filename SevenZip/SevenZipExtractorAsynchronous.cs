@@ -10,31 +10,20 @@ namespace SevenZip
 
         /// <summary>
         /// Recreates the instance of the SevenZipExtractor class.
-        /// Used in asynchronous methods.
         /// </summary>
         private void RecreateInstanceIfNeeded()
         {
-            if (NeedsToBeRecreated)
+            if (_archive == null)
             {
-                NeedsToBeRecreated = false;
-                Stream backupStream = null;
-                string backupFileName = null;
-                if (String.IsNullOrEmpty(_fileName))
+                try
                 {
-                    backupStream = _inStream;
+                    SevenZipLibraryManager.LoadLibrary(this, _format);
+                    _archive = SevenZipLibraryManager.InArchive(_format, this);
                 }
-                else
+                catch (SevenZipLibraryException)
                 {
-                    backupFileName = _fileName;
-                }
-                CommonDispose();
-                if (backupStream == null)
-                {
-                    Init(backupFileName);
-                }
-                else
-                {
-                    Init(backupStream);
+                    SevenZipLibraryManager.FreeLibrary(this, _format);
+                    throw;
                 }
             }
         }
