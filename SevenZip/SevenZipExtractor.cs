@@ -631,6 +631,7 @@ namespace SevenZip
                 {
                     _archive.Close();
                     _archiveStream = null;
+                    SevenZipLibraryManager.FreeLibrary(this, _format, true);
                 }
 
                 _archiveFileInfoCollection = new ReadOnlyCollection<ArchiveFileInfo>(_archiveFileData);
@@ -1026,6 +1027,7 @@ namespace SevenZip
                     ((IDisposable)_archiveStream).Dispose();
                 _archiveStream = null;
                 _opened = false;
+                SevenZipLibraryManager.FreeLibrary(this, _format, true);
             }
 
             return true;
@@ -1149,6 +1151,7 @@ namespace SevenZip
             {
                 _archive?.Close();
                 _opened = false;
+                SevenZipLibraryManager.FreeLibrary(this, _format, true);
             }
 
             OnEvent(ExtractionFinished, EventArgs.Empty, false);
@@ -1254,6 +1257,7 @@ namespace SevenZip
                     _archive?.Close();
                     _archiveStream = null;
                     _opened = false;
+                    SevenZipLibraryManager.FreeLibrary(this, _format, true);
                 }
             }
 
@@ -1421,6 +1425,7 @@ namespace SevenZip
                 _archive?.Close();
                 _archiveStream = null;
                 _opened = false;
+                SevenZipLibraryManager.FreeLibrary(this, _format, true);
             }
 
             ThrowUserException();
