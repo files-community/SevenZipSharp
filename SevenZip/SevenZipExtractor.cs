@@ -423,6 +423,7 @@ namespace SevenZip
                 {
                     (_archiveStream as DisposeVariableWrapper).DisposeStream = dispose;
                 }
+                _archiveStream.Seek(0, SeekOrigin.Begin, IntPtr.Zero);
                 return _archiveStream;
             }
 
