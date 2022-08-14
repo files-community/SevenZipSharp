@@ -41,7 +41,6 @@ namespace SevenZip
 
         internal override void SaveContext()
         {
-            DisposedCheck();
             _asynchronousDisposeLock = true;
             base.SaveContext();
         }
