@@ -540,7 +540,8 @@
             //257 byte offset
             {"52-61-72-21-1A-07-00",                                            InArchiveFormat.Rar4},
             {"52-61-72-21-1A-07-01-00",                                         InArchiveFormat.Rar},
-            {"50-4B-03-04",								                        InArchiveFormat.Zip},
+            {"50-4B-05-06",                                                     InArchiveFormat.Zip}, // Empty zip
+            {"50-4B-03-04",								                        InArchiveFormat.Zip}, // Zip entry
             {"5D-00-00-40-00",							                        InArchiveFormat.Lzma},
             {"2D-6C-68",								                        InArchiveFormat.Lzh},
             //^ 2 byte offset
@@ -576,7 +577,7 @@
 
             foreach (var pair in InSignatureFormats)
             {
-                InSignatureFormatsReversed.Add(pair.Value, pair.Key);
+                InSignatureFormatsReversed[pair.Value] = pair.Key; // Two sigs for zips
             }
         }
 
@@ -598,8 +599,6 @@
             if (!InExtensionFormats.ContainsKey(extension) && reportErrors)
             {
                 throw new ArgumentException("Extension \"" + extension + "\" is not a supported archive file name extension.");
-
-
             }
 
             return InExtensionFormats[extension];

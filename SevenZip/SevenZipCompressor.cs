@@ -1502,7 +1502,10 @@ namespace SevenZip
         public void CompressStreamDictionary(Stream archiveStream, IDictionary<string, Stream> streamDictionary, string password = "", Stream tempStream = null)
         {
             _compressingFilesOnDisk = true;
-            _archiveStream = archiveStream;
+            if (CompressionMode != CompressionMode.Create)
+            {
+                _archiveStream = archiveStream;
+            }
 
             var fs = GetArchiveFileStream(archiveStream, tempStream);
 
