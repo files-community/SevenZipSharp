@@ -523,11 +523,11 @@ namespace SevenZip
                                 _archive.GetProperty(i, ItemPropId.Path, ref data);
                                 fileInfo.FileName = NativeMethods.SafeCast(data, "[no name]");
                                 _archive.GetProperty(i, ItemPropId.LastWriteTime, ref data);
-                                fileInfo.LastWriteTime = NativeMethods.SafeCast(data, DateTime.Now);
+                                fileInfo.LastWriteTime = NativeMethods.SafeCast(data, DateTime.MinValue);
                                 _archive.GetProperty(i, ItemPropId.CreationTime, ref data);
-                                fileInfo.CreationTime = NativeMethods.SafeCast(data, DateTime.Now);
+                                fileInfo.CreationTime = NativeMethods.SafeCast(data, DateTime.MinValue);
                                 _archive.GetProperty(i, ItemPropId.LastAccessTime, ref data);
-                                fileInfo.LastAccessTime = NativeMethods.SafeCast(data, DateTime.Now);
+                                fileInfo.LastAccessTime = NativeMethods.SafeCast(data, DateTime.MinValue);
                                 _archive.GetProperty(i, ItemPropId.Size, ref data);
                                 fileInfo.Size = NativeMethods.SafeCast<ulong>(data, 0);
                                 if (fileInfo.Size == 0)
