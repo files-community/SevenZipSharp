@@ -8,7 +8,7 @@ jobs:
   build:
     strategy:
       matrix:
-        configuration: [Release, LiteRelease]
+        configuration: [Release]
 
     runs-on: windows-latest
 
