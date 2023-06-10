@@ -42,7 +42,6 @@ namespace SevenZip
         private ReadOnlyCollection<ArchiveFileInfo> _archiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _archiveProperties;
         private ReadOnlyCollection<string> _volumeFileNames;
-        private bool _leaveOpen;
 
         /// <summary>
         /// This is used to lock possible Dispose() calls.
@@ -162,12 +161,6 @@ namespace SevenZip
         {
         }
 
-        public SevenZipExtractor(Stream archiveStream, bool leaveOpen)
-        {
-            _leaveOpen = leaveOpen;
-            Init(archiveStream);
-        }
-
         /// <summary>
         /// Initializes a new instance of SevenZipExtractor class.
         /// </summary>
@@ -258,13 +251,6 @@ namespace SevenZip
         /// <remarks>The archive format is guessed by the signature.</remarks>
         public SevenZipExtractor(Stream archiveStream, string password) : this(archiveStream, password, false)
         {
-        }
-
-        public SevenZipExtractor(Stream archiveStream, string password, bool leaveOpen)
-            : base(password)
-        {
-            _leaveOpen = leaveOpen;
-            Init(archiveStream);
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace SevenZip
         /// <param name="value">Useful data carried by the IntEventArgs class</param>
         public ValueEventArgs(T value)
         {
-            Value = value;
+            _value = value;
         }
 
         /// <summary>
