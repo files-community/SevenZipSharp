@@ -42,6 +42,7 @@ namespace SevenZip
         private ReadOnlyCollection<ArchiveFileInfo> _archiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _archiveProperties;
         private ReadOnlyCollection<string> _volumeFileNames;
+        private bool _leaveOpen;
 
         /// <summary>
         /// This is used to lock possible Dispose() calls.
@@ -157,9 +158,8 @@ namespace SevenZip
         /// <param name="archiveStream">The stream to read the archive from.
         /// Use SevenZipExtractor(string) to extract from disk, though it is not necessary.</param>
         /// <remarks>The archive format is guessed by the signature.</remarks>
-        public SevenZipExtractor(Stream archiveStream)
+        public SevenZipExtractor(Stream archiveStream) : this(archiveStream, false)
         {
-            Init(archiveStream);
         }
 
         public SevenZipExtractor(Stream archiveStream, bool leaveOpen)
@@ -173,11 +173,24 @@ namespace SevenZip
         /// </summary>
         /// <param name="archiveStream">The stream to read the archive from.
         /// Use SevenZipExtractor(string) to extract from disk, though it is not necessary.</param>
+        /// <param name="leaveOpen">Leaves the base stream open.</param>
+        /// <remarks>The archive format is guessed by the signature.</remarks>
+        public SevenZipExtractor(Stream archiveStream, bool leaveOpen) : this(archiveStream, leaveOpen, (InArchiveFormat)(-1))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of SevenZipExtractor class.
+        /// </summary>
+        /// <param name="archiveStream">The stream to read the archive from.
+        /// Use SevenZipExtractor(string) to extract from disk, though it is not necessary.</param>
+        /// <param name="leaveOpen">Leaves the base stream open.</param>        
         /// <param name="format">Manual archive format setup. You SHOULD NOT normally specify it this way.
         /// Instead, use SevenZipExtractor(Stream archiveStream), that constructor
         /// automatically detects the archive format.</param>
-        public SevenZipExtractor(Stream archiveStream, InArchiveFormat format)
+        public SevenZipExtractor(Stream archiveStream, bool leaveOpen, InArchiveFormat format)
         {
+            _leaveOpen = leaveOpen;
             _format = format;
             Init(archiveStream);
         }
@@ -243,10 +256,8 @@ namespace SevenZip
         /// <param name="archiveStream">The stream to read the archive from.</param>
         /// <param name="password">Password for an encrypted archive.</param>
         /// <remarks>The archive format is guessed by the signature.</remarks>
-        public SevenZipExtractor(Stream archiveStream, string password)
-            : base(password)
+        public SevenZipExtractor(Stream archiveStream, string password) : this(archiveStream, password, false)
         {
-            Init(archiveStream);
         }
 
         public SevenZipExtractor(Stream archiveStream, string password, bool leaveOpen)
@@ -261,13 +272,26 @@ namespace SevenZip
         /// </summary>
         /// <param name="archiveStream">The stream to read the archive from.</param>
         /// <param name="password">Password for an encrypted archive.</param>
+        /// <param name="leaveOpen">Leaves the base stream open.</param>
+        /// <remarks>The archive format is guessed by the signature.</remarks>
+        public SevenZipExtractor(Stream archiveStream, string password, bool leaveOpen) : this(archiveStream, password, leaveOpen, (InArchiveFormat)(-1))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of SevenZipExtractor class.
+        /// </summary>
+        /// <param name="archiveStream">The stream to read the archive from.</param>
+        /// <param name="password">Password for an encrypted archive.</param>
+        /// <param name="leaveOpen">Leaves the base stream open.</param>
         /// <param name="format">Manual archive format setup. You SHOULD NOT normally specify it this way.
         /// Instead, use SevenZipExtractor(Stream archiveStream, string password), that constructor
         /// automatically detects the archive format.</param>
-        public SevenZipExtractor(Stream archiveStream, string password, InArchiveFormat format)
+        public SevenZipExtractor(Stream archiveStream, string password, bool leaveOpen, InArchiveFormat format)
             : base(password)
         {
             _format = format;
+            _leaveOpen = leaveOpen;
             Init(archiveStream);
         }
 
@@ -1159,14 +1183,14 @@ namespace SevenZip
 
             #region Indexes stuff
 
-            var uindexes = new uint[indexes.Length];
+            var uIndexes = new uint[indexes.Length];
 
             for (var i = 0; i < indexes.Length; i++)
             {
-                uindexes[i] = (uint)indexes[i];
+                uIndexes[i] = (uint)indexes[i];
             }
 
-            if (uindexes.Where(i => i >= _filesCount).Any(
+            if (uIndexes.Where(i => i >= _filesCount).Any(
                 i => !ThrowException(null,
                                      new ArgumentOutOfRangeException(nameof(indexes),
                                                                     $"Index must be less than {_filesCount.Value.ToString(CultureInfo.InvariantCulture)}!"))))
@@ -1174,13 +1198,13 @@ namespace SevenZip
                 return;
             }
 
-            var origIndexes = new List<uint>(uindexes);
+            var origIndexes = new List<uint>(uIndexes);
             origIndexes.Sort();
-            uindexes = origIndexes.ToArray();
+            uIndexes = origIndexes.ToArray();
 
             if (_isSolid.Value)
             {
-                uindexes = SolidIndexes(uindexes);
+                uIndexes = SolidIndexes(uIndexes);
             }
 
             #endregion
@@ -1205,7 +1229,7 @@ namespace SevenZip
                             try
                             {
                                 CheckedExecute(
-                                    _archive.Extract(uindexes, (uint)uindexes.Length, 0, aec),
+                                    _archive.Extract(uIndexes, (uint)uIndexes.Length, 0, aec),
                                     SevenZipExtractionFailedException.DEFAULT_MESSAGE, aec);
                             }
                             finally
