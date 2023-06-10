@@ -3,7 +3,7 @@
     <AssemblyName>SevenZipSharp</AssemblyName>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
-    <Configurations>Debug;Release</Configurations>
+    <Configurations>Debug;Release;Desktop</Configurations>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Joel Ahlgren</Authors>
     <AssemblyTitle>SevenZipSharp</AssemblyTitle>
@@ -18,6 +18,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DefineConstants>$(DefineConstants)TRACE;UNMANAGED</DefineConstants>
+  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)'=='Desktop'">
+    <DefineConstants>$(DefineConstants)TRACE;DEBUG;UNMANAGED;DESKTOP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="7z.dll" Pack="False">

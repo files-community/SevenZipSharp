@@ -22,16 +22,21 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
 		Release|x86 = Release|x86
+		Desktop|x86 = Desktop|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4960DD14-3431-47EC-B9D9-9D2730A98DC3}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{4960DD14-3431-47EC-B9D9-9D2730A98DC3}.Debug|x86.Build.0 = Debug|Any CPU
 		{4960DD14-3431-47EC-B9D9-9D2730A98DC3}.Release|x86.ActiveCfg = Release|Any CPU
 		{4960DD14-3431-47EC-B9D9-9D2730A98DC3}.Release|x86.Build.0 = Release|Any CPU
+		{4960DD14-3431-47EC-B9D9-9D2730A98DC3}.Desktop|x86.ActiveCfg = Desktop|Any CPU
+		{4960DD14-3431-47EC-B9D9-9D2730A98DC3}.Desktop|x86.Build.0 = Desktop|Any CPU
 		{67192E62-C7FE-485F-BEC4-05734A943FAA}.Debug|x86.ActiveCfg = Debug|x86
 		{67192E62-C7FE-485F-BEC4-05734A943FAA}.Debug|x86.Build.0 = Debug|x86
 		{67192E62-C7FE-485F-BEC4-05734A943FAA}.Release|x86.ActiveCfg = Release|x86
 		{67192E62-C7FE-485F-BEC4-05734A943FAA}.Release|x86.Build.0 = Release|x86
+		{67192E62-C7FE-485F-BEC4-05734A943FAA}.Desktop|x86.ActiveCfg = Debug|x86
+		{67192E62-C7FE-485F-BEC4-05734A943FAA}.Desktop|x86.Build.0 = Debug|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

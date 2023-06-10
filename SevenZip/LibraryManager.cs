@@ -145,7 +145,7 @@ namespace SevenZip
                         _libraryFileName = DetermineLibraryFilePath();
                     }
 
-                    if ((_modulePtr = NativeMethods.LoadPackagedLibrary(_libraryFileName)) == IntPtr.Zero)
+                    if ((_modulePtr = NativeMethods.LoadLibrary(_libraryFileName)) == IntPtr.Zero)
                     {
                         throw new SevenZipLibraryException($"failed to load library from \"{_libraryFileName}\".");
                     }

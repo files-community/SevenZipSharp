@@ -1733,7 +1733,6 @@ namespace SevenZip
                     extractor.ArchiveFileData.CopyTo(archiveData, 0);
                     _updateData.ArchiveFileData = new List<ArchiveFileInfo>(archiveData);
                 }
-                _archiveStream.Seek(0, SeekOrigin.Begin);
 
                 _updateData.FileNamesToModify = newFileNames;
                 _updateData.Mode = InternalCompressionMode.Modify;
