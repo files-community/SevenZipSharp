@@ -161,6 +161,8 @@ namespace SevenZip
 
         #region ICryptoGetTextPassword Members
 
+        public event EventHandler<EventArgs> PasswordRequested;
+
         /// <summary>
         /// Sets password for the archive
         /// </summary>
@@ -168,6 +170,7 @@ namespace SevenZip
         /// <returns>Zero if everything is OK</returns>
         public int CryptoGetTextPassword(out string password)
         {
+            PasswordRequested?.Invoke(this, null);
             password = Password;
             return 0;
         }

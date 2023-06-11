@@ -7,7 +7,6 @@ namespace SevenZip
     using System.Globalization;
     using System.IO;
     using System.Linq;
-
     using SevenZip.Sdk.Compression.Lzma;
 
     /// <summary>
@@ -482,9 +481,12 @@ namespace SevenZip
         {
             if (!_opened)
             {
-                if (OpenArchiveInner(archiveStream, openCallback) != OperationResult.Ok)
+                bool pwRequested = false;
+                openCallback.PasswordRequested += (s, e) => pwRequested = true;
+                var res = OpenArchiveInner(archiveStream, openCallback);
+                if (res != OperationResult.Ok)
                 {
-                    if (!ThrowException(null, new SevenZipArchiveException()))
+                    if (!ThrowException(null, new SevenZipOpenFailedException(res, pwRequested)))
                     {
                         return false;
                     }

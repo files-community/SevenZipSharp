@@ -188,9 +188,12 @@ namespace SevenZip
             {
                 ulong checkPos = 1 << 15;
 
-                if (inArchive.Open(inArchiveStream, ref checkPos, openCallback) != (int) OperationResult.Ok)
+                bool pwRequested = false;
+                openCallback.PasswordRequested += (s, e) => pwRequested = true;
+                var res = (OperationResult) inArchive.Open(inArchiveStream, ref checkPos, openCallback);
+                if (res != OperationResult.Ok)
                 {
-                    if (!ThrowException(null, new SevenZipArchiveException("Can not update the archive: Open() failed.")))
+                    if (!ThrowException(null, new SevenZipOpenFailedException("Can not update the archive: Open() failed.", res, pwRequested)))
                     {
                         return null;
                     }

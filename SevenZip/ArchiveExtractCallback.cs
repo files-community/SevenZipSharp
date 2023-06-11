@@ -458,9 +458,12 @@ namespace SevenZip
 
         #endregion
 
+        public event EventHandler<EventArgs> PasswordRequested;
+
         /// <inheritdoc />
         public int CryptoGetTextPassword(out string password)
         {
+            PasswordRequested?.Invoke(this, null);
             password = Password;
             return 0;
         }
