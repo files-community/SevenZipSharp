@@ -18,6 +18,11 @@ namespace SevenZip
         private readonly List<string> _volumeFileNames = new List<string>();
 
         /// <summary>
+        /// Occurs during archive opening if a password is required
+        /// </summary>
+        public event EventHandler<EventArgs> PasswordRequested;
+
+        /// <summary>
         /// Gets the list of volume file names.
         /// </summary>
         public IList<string> VolumeFileNames => _volumeFileNames;
@@ -160,8 +165,6 @@ namespace SevenZip
         #endregion
 
         #region ICryptoGetTextPassword Members
-
-        public event EventHandler<EventArgs> PasswordRequested;
 
         /// <summary>
         /// Sets password for the archive

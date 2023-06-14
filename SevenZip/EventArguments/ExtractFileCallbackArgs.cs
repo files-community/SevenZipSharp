@@ -91,7 +91,7 @@ namespace SevenZip
             {
                 if (_extractToStream != null && !_extractToStream.CanWrite)
                 {
-                    throw new ExtractionFailedException("The specified stream is not writable!");
+                    throw new SevenZipExtractionFailedException("The specified stream is not writable!");
                 }
 
                 _extractToStream = value;

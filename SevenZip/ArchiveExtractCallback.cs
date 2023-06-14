@@ -156,6 +156,11 @@ namespace SevenZip
         /// </summary>
         public event EventHandler<FileOverwriteEventArgs> FileExists;
 
+        /// <summary>
+        /// Occurs during the extraction if a password is required
+        /// </summary>
+        public event EventHandler<EventArgs> PasswordRequested;
+
         private void IntEventArgsHandler(object sender, IntEventArgs e)
         {
             // If _bytesCount is not set, we can't update the progress.
@@ -402,34 +407,34 @@ namespace SevenZip
                 switch (operationResult)
                 {
                     case OperationResult.CrcError:
-                        AddException(new ExtractionFailedException("File is corrupted. Crc check has failed."));
+                        AddException(new ExtractionFailedException("File is corrupted. Crc check has failed.", operationResult));
                         break;
                     case OperationResult.DataError:
-                        AddException(new ExtractionFailedException("File is corrupted. Data error has occured."));
+                        AddException(new ExtractionFailedException("File is corrupted. Data error has occured.", operationResult));
                         break;
                     case OperationResult.UnsupportedMethod:
-                        AddException(new ExtractionFailedException("Unsupported method error has occured."));
+                        AddException(new ExtractionFailedException("Unsupported method error has occured.", operationResult));
                         break;
                     case OperationResult.Unavailable:
-                        AddException(new ExtractionFailedException("File is unavailable."));
+                        AddException(new ExtractionFailedException("File is unavailable.", operationResult));
                         break;
                     case OperationResult.UnexpectedEnd:
-                        AddException(new ExtractionFailedException("Unexpected end of file."));
+                        AddException(new ExtractionFailedException("Unexpected end of file.", operationResult));
                         break;
                     case OperationResult.DataAfterEnd: 
-                        AddException(new ExtractionFailedException("Data after end of archive."));
+                        AddException(new ExtractionFailedException("Data after end of archive.", operationResult));
                         break;
                     case OperationResult.IsNotArc:
-                        AddException(new ExtractionFailedException("File is not archive."));
+                        AddException(new ExtractionFailedException("File is not archive.", operationResult));
                         break;
                     case OperationResult.HeadersError:
-                        AddException(new ExtractionFailedException("Archive headers error."));
+                        AddException(new ExtractionFailedException("Archive headers error.", operationResult));
                         break;
                     case OperationResult.WrongPassword:
-                        AddException(new ExtractionFailedException("Wrong password."));
+                        AddException(new ExtractionFailedException("Wrong password.", operationResult));
                         break;
                     default:
-                        AddException(new ExtractionFailedException($"Unexpected operation result: {operationResult}"));
+                        AddException(new ExtractionFailedException($"Unexpected operation result: {operationResult}", operationResult));
                         break;
                 }
             }
@@ -457,8 +462,6 @@ namespace SevenZip
         }
 
         #endregion
-
-        public event EventHandler<EventArgs> PasswordRequested;
 
         /// <inheritdoc />
         public int CryptoGetTextPassword(out string password)

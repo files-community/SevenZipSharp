@@ -674,34 +674,34 @@ namespace SevenZip
                 switch (operationResult)
                 {
                     case OperationResult.CrcError:
-                        AddException(new ExtractionFailedException("File is corrupted. Crc check has failed."));
+                        AddException(new ExtractionFailedException("File is corrupted. Crc check has failed.", operationResult));
                         break;
                     case OperationResult.DataError:
-                        AddException(new ExtractionFailedException("File is corrupted. Data error has occurred."));
+                        AddException(new ExtractionFailedException("File is corrupted. Data error has occurred.", operationResult));
                         break;
                     case OperationResult.UnsupportedMethod:
-                        AddException(new ExtractionFailedException("Unsupported method error has occurred."));
+                        AddException(new ExtractionFailedException("Unsupported method error has occurred.", operationResult));
                         break;
                     case OperationResult.Unavailable:
-                        AddException(new ExtractionFailedException("File is unavailable."));
+                        AddException(new ExtractionFailedException("File is unavailable.", operationResult));
                         break;
                     case OperationResult.UnexpectedEnd:
-                        AddException(new ExtractionFailedException("Unexpected end of file."));
+                        AddException(new ExtractionFailedException("Unexpected end of file.", operationResult));
                         break;
                     case OperationResult.DataAfterEnd: 
-                        AddException(new ExtractionFailedException("Data after end of archive."));
+                        AddException(new ExtractionFailedException("Data after end of archive.", operationResult));
                         break;
                     case OperationResult.IsNotArc:
-                        AddException(new ExtractionFailedException("File is not archive."));
+                        AddException(new ExtractionFailedException("File is not archive.", operationResult));
                         break;
                     case OperationResult.HeadersError:
-                        AddException(new ExtractionFailedException("Archive headers error."));
+                        AddException(new ExtractionFailedException("Archive headers error.", operationResult));
                         break;
                     case OperationResult.WrongPassword:
-                        AddException(new ExtractionFailedException("Wrong password."));
+                        AddException(new ExtractionFailedException("Wrong password.", operationResult));
                         break;
                     default:
-                        AddException(new ExtractionFailedException($"Unexpected operation result: {operationResult}"));
+                        AddException(new ExtractionFailedException($"Unexpected operation result: {operationResult}", operationResult));
                         break;
                 }
             }
