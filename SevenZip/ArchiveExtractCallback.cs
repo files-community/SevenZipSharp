@@ -14,6 +14,8 @@ namespace SevenZip
         private List<uint> _actualIndexes;
         private IInArchive _archive;
 
+        private bool _passwordRequested;
+
         /// <summary>
         /// For Compressing event.
         /// </summary>
@@ -155,11 +157,6 @@ namespace SevenZip
         /// Occurs during the extraction when a file already exists
         /// </summary>
         public event EventHandler<FileOverwriteEventArgs> FileExists;
-
-        /// <summary>
-        /// Occurs during the extraction if a password is required
-        /// </summary>
-        public event EventHandler<EventArgs> PasswordRequested;
 
         private void IntEventArgsHandler(object sender, IntEventArgs e)
         {
@@ -407,34 +404,34 @@ namespace SevenZip
                 switch (operationResult)
                 {
                     case OperationResult.CrcError:
-                        AddException(new ExtractionFailedException("File is corrupted. Crc check has failed.", operationResult));
+                        AddException(new ExtractionFailedException("File is corrupted. Crc check has failed.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.DataError:
-                        AddException(new ExtractionFailedException("File is corrupted. Data error has occured.", operationResult));
+                        AddException(new ExtractionFailedException("File is corrupted. Data error has occured.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.UnsupportedMethod:
-                        AddException(new ExtractionFailedException("Unsupported method error has occured.", operationResult));
+                        AddException(new ExtractionFailedException("Unsupported method error has occured.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.Unavailable:
-                        AddException(new ExtractionFailedException("File is unavailable.", operationResult));
+                        AddException(new ExtractionFailedException("File is unavailable.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.UnexpectedEnd:
-                        AddException(new ExtractionFailedException("Unexpected end of file.", operationResult));
+                        AddException(new ExtractionFailedException("Unexpected end of file.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.DataAfterEnd: 
-                        AddException(new ExtractionFailedException("Data after end of archive.", operationResult));
+                        AddException(new ExtractionFailedException("Data after end of archive.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.IsNotArc:
-                        AddException(new ExtractionFailedException("File is not archive.", operationResult));
+                        AddException(new ExtractionFailedException("File is not archive.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.HeadersError:
-                        AddException(new ExtractionFailedException("Archive headers error.", operationResult));
+                        AddException(new ExtractionFailedException("Archive headers error.", operationResult, _passwordRequested));
                         break;
                     case OperationResult.WrongPassword:
-                        AddException(new ExtractionFailedException("Wrong password.", operationResult));
+                        AddException(new ExtractionFailedException("Wrong password.", operationResult, _passwordRequested));
                         break;
                     default:
-                        AddException(new ExtractionFailedException($"Unexpected operation result: {operationResult}", operationResult));
+                        AddException(new ExtractionFailedException($"Unexpected operation result: {operationResult}", operationResult, _passwordRequested));
                         break;
                 }
             }
@@ -466,7 +463,7 @@ namespace SevenZip
         /// <inheritdoc />
         public int CryptoGetTextPassword(out string password)
         {
-            PasswordRequested?.Invoke(this, null);
+            _passwordRequested = true;
             password = Password;
             return 0;
         }

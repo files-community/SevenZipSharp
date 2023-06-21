@@ -21,17 +21,32 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the ExtractionFailedException class
         /// </summary>
-        public ExtractionFailedException(OperationResult result) : base(DEFAULT_MESSAGE)
+        public ExtractionFailedException(OperationResult result) : this(DEFAULT_MESSAGE, result)
         {
-            Result = result;
         }
 
         /// <summary>
         /// Initializes a new instance of the ExtractionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public ExtractionFailedException(string message, OperationResult result) : base(DEFAULT_MESSAGE, message)
+        public ExtractionFailedException(string message, OperationResult result) : base(message)
         {
+            Result = result;
+        }
+
+        public ExtractionFailedException(OperationResult result, bool passwordRequested) : this(DEFAULT_MESSAGE, result, passwordRequested)
+        {
+        }
+
+        public ExtractionFailedException(string message, OperationResult result, bool passwordRequested) : base(message)
+        {
+            if (result == OperationResult.DataError)
+            {
+                if (passwordRequested)
+                {
+                    result = OperationResult.WrongPassword;
+                }
+            }
             Result = result;
         }
     }
