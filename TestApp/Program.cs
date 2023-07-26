@@ -15,7 +15,7 @@ namespace TestApp
                 Console.WriteLine($"Contains: {arch.ArchiveFileData.Count} files");
                 var enc = arch.ArchiveFileData.Any(file => file.Encrypted || file.Method.Contains("Crypto") || file.Method.Contains("AES"));
                 Console.WriteLine($"Encrypted: {enc}, {arch.ArchiveProperties.FirstOrDefault(x => x.Name == "Encrypted").Value}");
-                arch.ExtractFile("temp\\dxwebsetup.exe", new MemoryStream());
+                arch.ExtractFile("orig\\dxwebsetup.exe", new MemoryStream());
             }
             catch(SevenZipOpenFailedException ex)
             {

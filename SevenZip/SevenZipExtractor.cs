@@ -463,8 +463,6 @@ namespace SevenZip
         /// <returns>OperationResult.Ok if Open() succeeds.</returns>
         private OperationResult OpenArchiveInner(IInStream archiveStream, IArchiveOpenCallback openCallback)
         {
-            RecreateInstanceIfNeeded();
-
             ulong checkPos = 1 << 15;
             var res = _archive.Open(archiveStream, ref checkPos, openCallback);
 
