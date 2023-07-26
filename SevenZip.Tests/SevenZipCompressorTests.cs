@@ -185,7 +185,7 @@
 
             var modificationList = new Dictionary<int, string> {{0, ""}};
 
-            Assert.Throws<SevenZipArchiveException>(() => compressor.ModifyArchive(TemporaryFile, modificationList));
+            Assert.Throws<SevenZipOpenFailedException>(() => compressor.ModifyArchive(TemporaryFile, modificationList));
         }
 
         [Test]
