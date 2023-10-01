@@ -6,7 +6,7 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            var filePath = @"C:\Users\gavet\Documents\Test\temp_p.7z";
+            var filePath = @"C:\Users\gavet\Documents\Test\Archives\temp_p.7z";
             var password = "";
             try
             {
@@ -25,6 +25,18 @@ namespace TestApp
             {
                 Console.WriteLine($"Error: {ex.Result}");
             }
+
+            /*var compressor = new SevenZipCompressor()
+            {
+                ArchiveFormat = OutArchiveFormat.Zip
+            };
+            compressor.Compressing += Compressor_Compressing;
+            compressor.CompressDirectory(@"C:\Users\gavet\Documents\Test", @"C:\Users\gavet\Documents\Test.zip");*/
+        }
+
+        private static void Compressor_Compressing(object? sender, ProgressEventArgs e)
+        {
+            Console.WriteLine(e.BytesProcessed / (double)e.BytesCount * 100);
         }
     }
 }

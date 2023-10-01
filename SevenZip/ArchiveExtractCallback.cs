@@ -178,7 +178,7 @@ namespace SevenZip
                 }
 
                 _bytesWrittenOld = _bytesWritten;
-                Extracting?.Invoke(this, new ProgressEventArgs((byte)pnow, (byte)(pnow - pold)));
+                Extracting?.Invoke(this, new ProgressEventArgs((byte)pnow, (byte)(pnow - pold), _bytesWritten, _bytesCount));
             }
         }
 

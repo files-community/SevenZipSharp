@@ -707,11 +707,10 @@ namespace SevenZip
             }
             if (_fileStream != null)
             {
-                _fileStream.BytesRead -= IntEventArgsHandler;
-
                 //Specific Zip implementation - can not Dispose files for Zip.
                 if (_compressor.ArchiveFormat != OutArchiveFormat.Zip)
                 {
+                    _fileStream.BytesRead -= IntEventArgsHandler;
                     try
                     {
                         _fileStream.Dispose();                            
@@ -765,6 +764,7 @@ namespace SevenZip
 
             foreach (var wrapper in _wrappersToDispose)
             {
+                wrapper.BytesRead -= IntEventArgsHandler;
                 try
                 {
                     wrapper.Dispose();
@@ -797,7 +797,7 @@ namespace SevenZip
                 if (pNow > pOld)
                 {
                     _bytesWrittenOld = _bytesWritten;
-                    OnCompressing(new ProgressEventArgs(pNow, (byte) (pNow - pOld)));
+                    OnCompressing(new ProgressEventArgs(pNow, (byte)(pNow - pOld), _bytesWritten, _bytesCount));
                 }
             }
         }

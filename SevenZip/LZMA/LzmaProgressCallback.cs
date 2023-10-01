@@ -46,7 +46,8 @@
                 }
                 Working(this, new ProgressEventArgs(
                                   PercentDoneEventArgs.ProducePercentDone(newPercentDone),
-                                  delta > 0 ? PercentDoneEventArgs.ProducePercentDone(delta) : (byte)0));
+                                  delta > 0 ? PercentDoneEventArgs.ProducePercentDone(delta) : (byte)0,
+								  inSize, _inSize));
             }
         }
 
