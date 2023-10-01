@@ -283,6 +283,7 @@ namespace SevenZip
                 }
                 _doneRate += 1.0f / _actualFilesCount;
                 var fiea = new FileNameEventArgs(_files != null? _files[index].Name : _entries[index],
+                                                 _files != null ? _files[index].FullName : null,
                                                  PercentDoneEventArgs.ProducePercentDone(_doneRate));
                 OnFileCompression(fiea);
                 
