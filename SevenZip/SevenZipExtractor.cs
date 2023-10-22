@@ -885,7 +885,7 @@ namespace SevenZip
         /// <param name="e">The event arguments.</param>
         private void FileExtractionFinishedEventProxy(object sender, FileInfoEventArgs e)
         {
-            OnEvent(FileExtractionFinished, e, true);
+            OnEvent(FileExtractionFinished, e, false);
         }
 
         /// <summary>
@@ -1299,7 +1299,7 @@ namespace SevenZip
 
             if (IsSolid)
             {
-                throw new SevenZipExtractionFailedException("Solid archives are not supported.");
+                //throw new SevenZipExtractionFailedException("Solid archives are not supported.");
             }
 
             foreach (var archiveFileInfo in ArchiveFileData)

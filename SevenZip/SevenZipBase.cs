@@ -62,7 +62,8 @@ namespace SevenZip
                         if (synchronous)
                         {
                             // Could be just handler(this, e);
-                            Context.Send(callback, new object[] { handler, this, e });
+                            //Context.Send(callback, new object[] { handler, this, e });
+                            handler(this, e);
                         }
                         else
                         {
