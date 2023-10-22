@@ -1,4 +1,4 @@
-This is a fork from [tomap's fork](https://github.com/tomap/SevenZipSharp) of the [original CodePlex project](https://archive.codeplex.com/?p=sevenzipsharp).
+This is a fork from [squid-box](https://github.com/squid-box/SevenZipSharp) of [tomap's fork](https://github.com/tomap/SevenZipSharp) of the [original CodePlex project](https://archive.codeplex.com/?p=sevenzipsharp). Changes include support for UWP & integration with [Files](https://github.com/files-community/Files/).
 
 ## Continuous Integration
 
