@@ -115,7 +115,8 @@ namespace SevenZip
     /// <summary>
     /// IInStream wrapper used in stream read operations.
     /// </summary>
-    internal sealed class InStreamWrapper : StreamWrapper, ISequentialInStream, IInStream
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class InStreamWrapper : StreamWrapper, ISequentialInStream, IInStream
     {
         /// <summary>
         /// Initializes a new instance of the InStreamWrapper class.
@@ -162,7 +163,8 @@ namespace SevenZip
     /// <summary>
     /// IOutStream wrapper used in stream write operations.
     /// </summary>
-    internal sealed class OutStreamWrapper : StreamWrapper, ISequentialOutStream, IOutStream
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class OutStreamWrapper : StreamWrapper, ISequentialOutStream, IOutStream
     {
         /// <summary>
         /// Initializes a new instance of the OutStreamWrapper class
@@ -333,7 +335,8 @@ namespace SevenZip
     /// <summary>
     /// IInStream wrapper used in stream multi volume read operations.
     /// </summary>
-    internal sealed class InMultiStreamWrapper : MultiStreamWrapper, ISequentialInStream, IInStream
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class InMultiStreamWrapper : MultiStreamWrapper, ISequentialInStream, IInStream
     {
         /// <summary>
         /// Initializes a new instance of the InMultiStreamWrapper class.
@@ -391,7 +394,8 @@ namespace SevenZip
     /// <summary>
     /// IOutStream wrapper used in multi volume stream write operations.
     /// </summary>
-    internal sealed class OutMultiStreamWrapper : MultiStreamWrapper, ISequentialOutStream, IOutStream
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class OutMultiStreamWrapper : MultiStreamWrapper, ISequentialOutStream, IOutStream
     {
         private readonly string _archiveName;
         private readonly long _volumeSize;
@@ -462,7 +466,8 @@ namespace SevenZip
         }
     }
 
-    internal sealed class FakeOutStreamWrapper : ISequentialOutStream, IDisposable
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class FakeOutStreamWrapper : ISequentialOutStream, IDisposable
     {
         #region IDisposable Members
 

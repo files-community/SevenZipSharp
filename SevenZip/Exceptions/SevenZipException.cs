@@ -59,8 +59,10 @@
         /// </summary>
         /// <param name="info">All data needed for serialization or deserialization</param>
         /// <param name="context">Serialized stream descriptor</param>
+#pragma warning disable SYSLIB0051 // Formatter-based serialization is obsolete; kept for API compatibility
         protected SevenZipException(
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
+#pragma warning restore SYSLIB0051
     }
 }

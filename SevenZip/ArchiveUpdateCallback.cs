@@ -9,7 +9,10 @@ namespace SevenZip
     /// <summary>
     /// Archive update callback to handle the process of packing files
     /// </summary>
-    internal sealed class ArchiveUpdateCallback : CallbackBase, IArchiveUpdateCallback, ICryptoGetTextPassword2,
+    // Passed across the COM ABI to native 7-zip (IOutArchive.UpdateItems); [GeneratedComClass]
+    // emits the COM vtable so the source-generated marshaller can expose it without built-in COM interop
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class ArchiveUpdateCallback : CallbackBase, IArchiveUpdateCallback, ICryptoGetTextPassword2,
                                                   IDisposable
     {
         #region Fields

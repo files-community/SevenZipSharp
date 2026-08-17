@@ -9,7 +9,10 @@ namespace SevenZip
     /// <summary>
     /// Callback to handle the archive opening
     /// </summary>
-    internal sealed class ArchiveOpenCallback : CallbackBase, IArchiveOpenCallback, IArchiveOpenVolumeCallback,
+    // Passed across the COM ABI to native 7-zip (IInArchive.Open); [GeneratedComClass]
+    // emits the COM vtable so the source-generated marshaller can expose it without built-in COM interop
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class ArchiveOpenCallback : CallbackBase, IArchiveOpenCallback, IArchiveOpenVolumeCallback,
                                                 ICryptoGetTextPassword, IDisposable
     {
         private FileInfo _fileInfo;

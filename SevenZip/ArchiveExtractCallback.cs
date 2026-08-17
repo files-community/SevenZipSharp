@@ -9,7 +9,10 @@ namespace SevenZip
     /// <summary>
     /// Archive extraction callback to handle the process of unpacking files
     /// </summary>
-    internal sealed class ArchiveExtractCallback : CallbackBase, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
+    // Passed across the COM ABI to native 7-zip (IInArchive.Extract); [GeneratedComClass]
+    // emits the COM vtable so the source-generated marshaller can expose it without built-in COM interop
+    [System.Runtime.InteropServices.Marshalling.GeneratedComClass]
+    internal sealed partial class ArchiveExtractCallback : CallbackBase, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
     {
         private List<uint> _actualIndexes;
         private IInArchive _archive;

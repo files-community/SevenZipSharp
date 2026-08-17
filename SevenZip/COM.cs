@@ -5,6 +5,7 @@
     using System.Globalization;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Runtime.InteropServices.Marshalling;
 #if NET472 || NETSTANDARD2_0
     using System.Security.Permissions;
 #endif
@@ -126,11 +127,18 @@
                 var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                 sp.Demand();
 #endif
+                // Decoded manually: Marshal.GetObjectForNativeVariant needs built-in COM
+                // interop, which is unavailable on Native AOT
                 switch (VarType)
                 {
                     case VarEnum.VT_BSTR:
                         return Marshal.PtrToStringBSTR(Value);
+                    case VarEnum.VT_LPWSTR:
+                        return Marshal.PtrToStringUni(Value);
+                    case VarEnum.VT_LPSTR:
+                        return Marshal.PtrToStringAnsi(Value);
                     case VarEnum.VT_EMPTY:
+                    case VarEnum.VT_NULL:
                         return null;
                     case VarEnum.VT_FILETIME:
                         try
@@ -141,33 +149,34 @@
                         {
                             return DateTime.MinValue;
                         }
+                    case VarEnum.VT_BOOL:
+                        // VARIANT_BOOL is 16-bit; VARIANT_TRUE is 0xFFFF
+                        return (ushort)(UInt32Value & 0xFFFF) != 0;
+                    case VarEnum.VT_UI1:
+                        return (byte)(UInt32Value & 0xFF);
+                    case VarEnum.VT_I1:
+                        return (sbyte)(Int32Value & 0xFF);
+                    case VarEnum.VT_UI2:
+                        return (ushort)(UInt32Value & 0xFFFF);
+                    case VarEnum.VT_I2:
+                        return (short)(Int32Value & 0xFFFF);
+                    case VarEnum.VT_UI4:
+                    case VarEnum.VT_UINT:
+                        return UInt32Value;
+                    case VarEnum.VT_I4:
+                    case VarEnum.VT_INT:
+                    case VarEnum.VT_ERROR:
+                        return Int32Value;
+                    case VarEnum.VT_UI8:
+                        return UInt64Value;
+                    case VarEnum.VT_I8:
+                        return Int64Value;
+                    case VarEnum.VT_R4:
+                        return BitConverter.Int32BitsToSingle(Int32Value);
+                    case VarEnum.VT_R8:
+                        return BitConverter.Int64BitsToDouble(Int64Value);
                     default:
-                        var propHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
-
-                        try
-                        {
-                            return Marshal.GetObjectForNativeVariant(propHandle.AddrOfPinnedObject());
-                        }
-                        catch (NotSupportedException)
-                        {
-                            switch (VarType)
-                            {
-                                case VarEnum.VT_UI8:
-                                    return UInt64Value;
-                                case VarEnum.VT_UI4:
-                                    return UInt32Value;
-                                case VarEnum.VT_I8:
-                                    return Int64Value;
-                                case VarEnum.VT_I4:
-                                    return Int32Value;
-                                default:
-                                    return 0;
-                            }
-                        }
-                        finally
-                        {
-                            propHandle.Free();
-                        }
+                        return 0;
                 }
             }
         }
@@ -662,10 +671,9 @@
     /// <summary>
     /// 7-zip IArchiveOpenCallback imported interface to handle the opening of an archive.
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000600100000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IArchiveOpenCallback
+    internal partial interface IArchiveOpenCallback
     {
         // ref ulong replaced with IntPtr because handlers often pass null value
         // read actual value with Marshal.ReadInt64
@@ -691,10 +699,9 @@
     /// <summary>
     /// 7-zip ICryptoGetTextPassword imported interface to get the archive password.
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000500100000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface ICryptoGetTextPassword
+    internal partial interface ICryptoGetTextPassword
     {
         /// <summary>
         /// Gets password for the archive
@@ -709,10 +716,9 @@
     /// <summary>
     /// 7-zip ICryptoGetTextPassword2 imported interface for setting the archive password.
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000500110000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface ICryptoGetTextPassword2
+    internal partial interface ICryptoGetTextPassword2
     {
         /// <summary>
         /// Sets password for the archive
@@ -729,10 +735,9 @@
     /// <summary>
     /// 7-zip IArchiveExtractCallback imported interface.
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000600200000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IArchiveExtractCallback
+    internal partial interface IArchiveExtractCallback
     {
         /// <summary>
         /// Gives the size of the unpacked archive files
@@ -744,7 +749,7 @@
         /// SetCompleted 7-zip function
         /// </summary>
         /// <param name="completeValue"></param>
-        void SetCompleted([In] ref ulong completeValue);
+        void SetCompleted(ref ulong completeValue);
 
         /// <summary>
         /// Gets the stream for file extraction
@@ -756,7 +761,7 @@
         [PreserveSig]
         int GetStream(
             uint index,
-            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream outStream,
+            out ISequentialOutStream outStream,
             AskMode askExtractMode);
 
         /// <summary>
@@ -775,10 +780,9 @@
     /// <summary>
     /// 7-zip IArchiveUpdateCallback imported interface.
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000600800000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IArchiveUpdateCallback
+    internal partial interface IArchiveUpdateCallback
     {
         /// <summary>
         /// Gives the size of the unpacked archive files.
@@ -790,7 +794,7 @@
         /// SetCompleted 7-zip internal function.
         /// </summary>
         /// <param name="completeValue"></param>
-        void SetCompleted([In] ref ulong completeValue);
+        void SetCompleted(ref ulong completeValue);
 
         /// <summary>
         /// Gets archive update mode.
@@ -824,7 +828,7 @@
         [PreserveSig]
         int GetStream(
             uint index,
-            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialInStream inStream);
+            out ISequentialInStream inStream);
 
         /// <summary>
         /// Sets the result for currently performed operation.
@@ -843,10 +847,9 @@
     /// <summary>
     /// 7-zip IArchiveOpenVolumeCallback imported interface to handle archive volumes.
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000600300000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IArchiveOpenVolumeCallback
+    internal partial interface IArchiveOpenVolumeCallback
     {
         /// <summary>
         /// Gets the archive property data.
@@ -866,16 +869,15 @@
         [PreserveSig]
         int GetStream(
             [MarshalAs(UnmanagedType.LPWStr)] string name,
-            [Out, MarshalAs(UnmanagedType.Interface)] out IInStream inStream);
+            out IInStream inStream);
     }    
 
     /// <summary>
     /// 7-zip ISequentialInStream imported interface
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000300010000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface ISequentialInStream
+    internal partial interface ISequentialInStream
     {
         /// <summary>
         /// Writes data to 7-zip packer
@@ -889,17 +891,16 @@
         /// You must call Read function in loop, if you need exact amount of data.
         /// </remarks>
         int Read(
-            [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            [Out, MarshalUsing(CountElementName = nameof(size))] byte[] data,
             uint size);
     }
 
     /// <summary>
     /// 7-zip ISequentialOutStream imported interface
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000300020000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface ISequentialOutStream
+    internal partial interface ISequentialOutStream
     {
         /// <summary>
         /// Writes data to unpacked file stream
@@ -917,17 +918,16 @@
         /// </remarks>
         [PreserveSig]
         int Write(
-            [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            [In, MarshalUsing(CountElementName = nameof(size))] byte[] data,
             uint size, IntPtr processedSize);
     }
 
     /// <summary>
     /// 7-zip IInStream imported interface
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000300030000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IInStream
+    internal partial interface IInStream
     {
         /// <summary>
         /// Read routine
@@ -936,7 +936,7 @@
         /// <param name="size">Array size</param>
         /// <returns>Zero if Ok</returns>
         int Read(
-            [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            [Out, MarshalUsing(CountElementName = nameof(size))] byte[] data,
             uint size);
 
         /// <summary>
@@ -952,10 +952,9 @@
     /// <summary>
     /// 7-zip IOutStream imported interface
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000300040000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IOutStream
+    internal partial interface IOutStream
     {
         /// <summary>
         /// Write routine
@@ -966,7 +965,7 @@
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int Write(
-            [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            [In, MarshalUsing(CountElementName = nameof(size))] byte[] data,
             uint size,
             IntPtr processedSize);
 
@@ -991,10 +990,9 @@
     /// <summary>
     /// 7-zip essential in archive interface
     /// </summary>
-    [ComImport]  
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000600600000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]	
-    internal interface IInArchive
+    internal partial interface IInArchive
     {
         /// <summary>
         /// Opens archive for reading.
@@ -1006,8 +1004,8 @@
         [PreserveSig]
         int Open(
             IInStream stream,
-            [In] ref ulong maxCheckStartPosition,
-            [MarshalAs(UnmanagedType.Interface)] IArchiveOpenCallback openArchiveCallback);
+            ref ulong maxCheckStartPosition,
+            IArchiveOpenCallback openArchiveCallback);
 
         /// <summary>
         /// Closes the archive.
@@ -1041,10 +1039,10 @@
         /// <returns>0 if success</returns>
         [PreserveSig]
         int Extract(
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] uint[] indexes,
+            [MarshalUsing(CountElementName = nameof(numItems))] uint[] indexes,
             uint numItems,
             int testMode,
-            [MarshalAs(UnmanagedType.Interface)] IArchiveExtractCallback extractCallback);
+            IArchiveExtractCallback extractCallback);
 
         /// <summary>
         /// Gets archive property data
@@ -1097,10 +1095,9 @@
     /// <summary>
     /// 7-zip essential out archive interface
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000600A00000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IOutArchive
+    internal partial interface IOutArchive
     {
         /// <summary>
         /// Updates archive items
@@ -1111,9 +1108,9 @@
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int UpdateItems(
-            [MarshalAs(UnmanagedType.Interface)] ISequentialOutStream outStream,
+            ISequentialOutStream outStream,
             uint numItems,
-            [MarshalAs(UnmanagedType.Interface)] IArchiveUpdateCallback updateCallback);
+            IArchiveUpdateCallback updateCallback);
 
         /// <summary>
         /// Gets file time type(?)
@@ -1125,10 +1122,9 @@
     /// <summary>
     /// 7-zip ISetProperties interface for setting various archive properties
     /// </summary>
-    [ComImport]
+    [GeneratedComInterface]
     [Guid("23170F69-40C1-278A-0000-000600030000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface ISetProperties
+    internal partial interface ISetProperties
     {
         /// <summary>
         /// Sets the archive properties

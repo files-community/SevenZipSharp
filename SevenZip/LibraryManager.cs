@@ -15,12 +15,66 @@ namespace SevenZip
     /// <summary>
     /// 7-zip library low-level wrapper.
     /// </summary>
-    internal static class SevenZipLibraryManager
+    internal static partial class SevenZipLibraryManager
     {
         /// <summary>
         /// Synchronization root for all locking.
         /// </summary>
         private static readonly object SyncRoot = new object();
+
+        private static readonly System.Runtime.InteropServices.Marshalling.StrategyBasedComWrappers ComWrappers = new();
+
+        /// <summary>
+        /// Calls the native CreateObject export and returns the raw COM interface pointer.
+        /// Invoked through an unmanaged function pointer: delegate marshalling of by-ref
+        /// parameters is unavailable with runtime marshalling disabled.
+        /// </summary>
+        private static unsafe IntPtr CreateComObject(IntPtr createObjectFnPtr, ref Guid classId, ref Guid interfaceId)
+        {
+            IntPtr resultPtr;
+            int hr;
+
+            fixed (Guid* cid = &classId)
+            fixed (Guid* iid = &interfaceId)
+            {
+                hr = ((delegate* unmanaged[Stdcall]<Guid*, Guid*, IntPtr*, int>)createObjectFnPtr)(cid, iid, &resultPtr);
+            }
+
+            if (hr != 0)
+            {
+                throw new SevenZipLibraryException();
+            }
+
+            return resultPtr;
+        }
+
+        private static object WrapComPointer(IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero)
+            {
+                throw new SevenZipLibraryException();
+            }
+
+            try
+            {
+                // UniqueInstance so FinalRelease can release deterministically before the native library unloads
+                return ComWrappers.GetOrCreateObjectForComInstance(ptr, CreateObjectFlags.UniqueInstance);
+            }
+            finally
+            {
+                // GetOrCreateObjectForComInstance holds its own reference
+                Marshal.Release(ptr);
+            }
+        }
+
+        private static void ReleaseComPointer(object rcw)
+        {
+            // Must run before FreeLibrary; a finalizer-time Release would call into the unloaded module
+            if (rcw is System.Runtime.InteropServices.Marshalling.ComObject comObject)
+            {
+                comObject.FinalRelease();
+            }
+        }
 
         /// <summary>
         /// Path to the 7-zip dll.
@@ -34,8 +88,9 @@ namespace SevenZip
         /// </remarks>
         private static string _libraryFileName;
 
-        [DllImport("api-ms-win-core-wow64-l1-1-1.dll", SetLastError = true)]
-        private static extern bool IsWow64Process2(
+        [LibraryImport("api-ms-win-core-wow64-l1-1-1.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsWow64Process2(
                 IntPtr process,
                 out ushort processMachine,
                 out ushort nativeMachine);
@@ -359,7 +414,7 @@ namespace SevenZip
                         {
                             try
                             {
-                                Marshal.ReleaseComObject(_inArchives[user][archiveFormat]);
+                                ReleaseComPointer(_inArchives[user][archiveFormat]);
                             }
                             catch (InvalidComObjectException) { }
 
@@ -381,7 +436,7 @@ namespace SevenZip
                         {
                             try
                             {
-                                Marshal.ReleaseComObject(_outArchives[user][outArchiveFormat]);
+                                ReleaseComPointer(_outArchives[user][outArchiveFormat]);
                             }
                             catch (InvalidComObjectException) { }
 
@@ -436,12 +491,9 @@ namespace SevenZip
                         }
                     }
 
-                    var createObject = (NativeMethods.CreateObjectDelegate)
-                        Marshal.GetDelegateForFunctionPointer(
-                            NativeMethods.GetProcAddress(_modulePtr, "CreateObject"),
-                            typeof(NativeMethods.CreateObjectDelegate));
+                    var createObjectFnPtr = NativeMethods.GetProcAddress(_modulePtr, "CreateObject");
 
-                    if (createObject == null)
+                    if (createObjectFnPtr == IntPtr.Zero)
                     {
                         throw new SevenZipLibraryException();
                     }
@@ -452,7 +504,7 @@ namespace SevenZip
 
                     try
                     {
-                        createObject(ref classId, ref interfaceId, out result);
+                        result = WrapComPointer(CreateComObject(createObjectFnPtr, ref classId, ref interfaceId));
                     }
                     catch (Exception)
                     {
@@ -487,17 +539,19 @@ namespace SevenZip
                         throw new SevenZipLibraryException();
                     }
 
-                    var createObject = (NativeMethods.CreateObjectDelegate)
-                        Marshal.GetDelegateForFunctionPointer(
-                            NativeMethods.GetProcAddress(_modulePtr, "CreateObject"),
-                            typeof(NativeMethods.CreateObjectDelegate));
-                    var interfaceId = typeof(IOutArchive).GUID;
+                    var createObjectFnPtr = NativeMethods.GetProcAddress(_modulePtr, "CreateObject");
 
+                    if (createObjectFnPtr == IntPtr.Zero)
+                    {
+                        throw new SevenZipLibraryException();
+                    }
+
+                    var interfaceId = typeof(IOutArchive).GUID;
 
                     try
                     {
                         var classId = Formats.OutFormatGuids[format];
-                        createObject(ref classId, ref interfaceId, out var result);
+                        var result = WrapComPointer(CreateComObject(createObjectFnPtr, ref classId, ref interfaceId));
 
                         InitUserOutFormat(user, format);
                         _outArchives[user][format] = result as IOutArchive;
