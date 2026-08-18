@@ -532,30 +532,41 @@ namespace SevenZip
                             try
                             {
                                 var fileInfo = new ArchiveFileInfo { Index = (int)i };
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.Path, ref data);
                                 fileInfo.FileName = NativeMethods.SafeCast(data, "[no name]");
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.LastWriteTime, ref data);
                                 fileInfo.LastWriteTime = NativeMethods.SafeCast(data, DateTime.MinValue);
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.CreationTime, ref data);
                                 fileInfo.CreationTime = NativeMethods.SafeCast(data, DateTime.MinValue);
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.LastAccessTime, ref data);
                                 fileInfo.LastAccessTime = NativeMethods.SafeCast(data, DateTime.MinValue);
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.Size, ref data);
                                 fileInfo.Size = NativeMethods.SafeCast<ulong>(data, 0);
                                 if (fileInfo.Size == 0)
                                 {
                                     fileInfo.Size = NativeMethods.SafeCast<uint>(data, 0);
                                 }
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.Attributes, ref data);
                                 fileInfo.Attributes = NativeMethods.SafeCast<uint>(data, 0);
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.IsDirectory, ref data);
                                 fileInfo.IsDirectory = NativeMethods.SafeCast(data, false);
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.Encrypted, ref data);
                                 fileInfo.Encrypted = NativeMethods.SafeCast(data, false);
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.Crc, ref data);
                                 fileInfo.Crc = NativeMethods.SafeCast<uint>(data, 0);
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.Comment, ref data);
                                 fileInfo.Comment = NativeMethods.SafeCast(data, "");
+                                data.Clear();
                                 _archive.GetProperty(i, ItemPropId.Method, ref data);
                                 fileInfo.Method = NativeMethods.SafeCast(data, "");
                                 _archiveFileData.Add(fileInfo);
@@ -576,6 +587,7 @@ namespace SevenZip
                         for (uint i = 0; i < numProps; i++)
                         {
                             _archive.GetArchivePropertyInfo(i, out var propName, out var propId, out var varType);
+                            data.Clear();
                             _archive.GetArchiveProperty(propId, ref data);
 
                             if (propId == ItemPropId.Solid)
@@ -618,6 +630,10 @@ namespace SevenZip
                         {
                             throw;
                         }
+                    }
+                    finally
+                    {
+                        data.Clear();
                     }
                 }
             }

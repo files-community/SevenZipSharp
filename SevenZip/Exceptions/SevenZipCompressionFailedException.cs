@@ -3,12 +3,10 @@
 namespace SevenZip
 {
     using System;
-    using System.Runtime.Serialization;
 
     /// <summary>
     /// Exception class for fail to create an archive in SevenZipCompressor.
     /// </summary>
-    [Serializable]
     public class SevenZipCompressionFailedException : SevenZipException
     {
         /// <summary>
@@ -34,15 +32,6 @@ namespace SevenZip
         /// <param name="inner">Inner exception occurred</param>
         public SevenZipCompressionFailedException(string message, Exception inner)
             : base(DEFAULT_MESSAGE, message, inner) { }
-
-        /// <summary>
-        /// Initializes a new instance of the SevenZipCompressionFailedException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected SevenZipCompressionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
     }
 }
 

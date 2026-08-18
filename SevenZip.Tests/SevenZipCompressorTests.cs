@@ -33,6 +33,11 @@
         [Test]
         public void CompressDirectory_WithSfnPath()
         {
+            if (!Directory.Exists("TESTDA~1"))
+            {
+                Assert.Ignore("8.3 short file names are disabled on this volume.");
+            }
+
             var compressor = new SevenZipCompressor
             {
                 ArchiveFormat = OutArchiveFormat.Zip,
@@ -61,6 +66,11 @@
         [Test]
         public void CompressFile_WithSfnPath()
         {
+            if (!Directory.Exists("TESTDA~1"))
+            {
+                Assert.Ignore("8.3 short file names are disabled on this volume.");
+            }
+
             var compressor = new SevenZipCompressor
             {
                 ArchiveFormat = OutArchiveFormat.Zip

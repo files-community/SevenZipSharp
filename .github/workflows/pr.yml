@@ -14,16 +14,22 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v3
+    - name: Install .NET
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 10.0.x
 
     - name: Execute unit tests
       run: dotnet test -c $env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
+
+    - name: Publish NativeAOT smoke test
+      run: dotnet publish TestApp/TestApp.csproj -c Desktop -r win-x64 --self-contained true -o artifacts/aot
+
+    - name: Execute NativeAOT smoke test
+      run: artifacts/aot/TestApp.exe

@@ -3,7 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Runtime.Serialization.Formatters.Binary;
+    using System.Text;
     using NUnit.Framework;
 
     using SevenZip;
@@ -12,20 +12,18 @@
     public class MiscellaneousTests : TestBase
     {
         [Test]
-        public void SerializationTest()
+        public void CompressStreamTest()
         {
-            var argumentException = new ArgumentException("blahblah");
-            var binaryFormatter = new BinaryFormatter();
-
-            using (var ms = new MemoryStream())
+            using (var input = new MemoryStream(Encoding.UTF8.GetBytes("SevenZipSharp")))
             {
                 using (var fileStream = File.Create(TemporaryFile))
                 {
-                    binaryFormatter.Serialize(ms, argumentException);
                     var compressor = new SevenZipCompressor();
-                    compressor.CompressStream(ms, fileStream);
+                    compressor.CompressStream(input, fileStream);
                 }
             }
+
+            Assert.That(new FileInfo(TemporaryFile).Length, Is.GreaterThan(0));
         }
 
 #if SFX

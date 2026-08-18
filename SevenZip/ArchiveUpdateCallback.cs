@@ -4,12 +4,14 @@ namespace SevenZip
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Runtime.InteropServices.Marshalling;
 
 #if UNMANAGED
     /// <summary>
     /// Archive update callback to handle the process of packing files
     /// </summary>
-    internal sealed class ArchiveUpdateCallback : CallbackBase, IArchiveUpdateCallback, ICryptoGetTextPassword2,
+    [GeneratedComClass]
+    internal sealed partial class ArchiveUpdateCallback : CallbackBase, IArchiveUpdateCallback, ICryptoGetTextPassword2,
                                                   IDisposable
     {
         #region Fields

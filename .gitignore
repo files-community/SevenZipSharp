@@ -8,6 +8,7 @@ Backup/
 .vs/**
 /packages/**
 /[Ss]tage/**
+/artifacts/**
 /TestResult.xml
 /coverage.xml
 *.nupkg

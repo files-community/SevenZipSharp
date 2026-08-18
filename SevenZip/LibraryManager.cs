@@ -2,11 +2,7 @@ namespace SevenZip
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Diagnostics;
-#if NET472 || NETSTANDARD2_0
-    using System.Security.Permissions;
-#endif
     using System.IO;
     using System.Runtime.InteropServices;
     using System.Text;
@@ -15,7 +11,7 @@ namespace SevenZip
     /// <summary>
     /// 7-zip library low-level wrapper.
     /// </summary>
-    internal static class SevenZipLibraryManager
+    internal static partial class SevenZipLibraryManager
     {
         /// <summary>
         /// Synchronization root for all locking.
@@ -34,8 +30,9 @@ namespace SevenZip
         /// </remarks>
         private static string _libraryFileName;
 
-        [DllImport("api-ms-win-core-wow64-l1-1-1.dll", SetLastError = true)]
-        private static extern bool IsWow64Process2(
+        [LibraryImport("api-ms-win-core-wow64-l1-1-1.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsWow64Process2(
                 IntPtr process,
                 out ushort processMachine,
                 out ushort nativeMachine);
@@ -153,6 +150,7 @@ namespace SevenZip
                     if (NativeMethods.GetProcAddress(_modulePtr, "GetHandlerProperty") == IntPtr.Zero)
                     {
                         NativeMethods.FreeLibrary(_modulePtr);
+                        _modulePtr = IntPtr.Zero;
                         throw new SevenZipLibraryException("library is invalid.");
                     }
                 }
@@ -343,10 +341,6 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public static void FreeLibrary(object user, Enum format, bool isIntermediate = false)
         {
-#if NET472 || NETSTANDARD2_0
-            var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-            sp.Demand();
-#endif
             lock (SyncRoot)
 			{
                 if (_modulePtr != IntPtr.Zero)
@@ -354,14 +348,12 @@ namespace SevenZip
                     if (format is InArchiveFormat archiveFormat)
                     {
                         if (_inArchives != null && _inArchives.ContainsKey(user) &&
-                            _inArchives[user].ContainsKey(archiveFormat) &&
-                            _inArchives[user][archiveFormat] != null)
+                            _inArchives[user].ContainsKey(archiveFormat))
                         {
-                            try
+                            if (_inArchives[user][archiveFormat] != null)
                             {
-                                Marshal.ReleaseComObject(_inArchives[user][archiveFormat]);
+                                ComInterop.Release(_inArchives[user][archiveFormat]);
                             }
-                            catch (InvalidComObjectException) { }
 
                             _inArchives[user].Remove(archiveFormat);
                             _totalUsers--;
@@ -376,14 +368,12 @@ namespace SevenZip
                     if (format is OutArchiveFormat outArchiveFormat)
                     {
                         if (_outArchives != null && _outArchives.ContainsKey(user) &&
-                            _outArchives[user].ContainsKey(outArchiveFormat) &&
-                            _outArchives[user][outArchiveFormat] != null)
+                            _outArchives[user].ContainsKey(outArchiveFormat))
                         {
-                            try
+                            if (_outArchives[user][outArchiveFormat] != null)
                             {
-                                Marshal.ReleaseComObject(_outArchives[user][outArchiveFormat]);
+                                ComInterop.Release(_outArchives[user][outArchiveFormat]);
                             }
-                            catch (InvalidComObjectException) { }
 
                             _outArchives[user].Remove(outArchiveFormat);
                             _totalUsers--;
@@ -421,11 +411,6 @@ namespace SevenZip
             {
                 if (!_inArchives.ContainsKey(user) || _inArchives[user][format] == null)
                 {
-#if NET472 || NETSTANDARD2_0
-                    var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-                    sp.Demand();
-#endif
-
                     if (_modulePtr == IntPtr.Zero)
                     {
                         LoadLibrary(user, format);
@@ -436,31 +421,20 @@ namespace SevenZip
                         }
                     }
 
-                    var createObject = (NativeMethods.CreateObjectDelegate)
-                        Marshal.GetDelegateForFunctionPointer(
-                            NativeMethods.GetProcAddress(_modulePtr, "CreateObject"),
-                            typeof(NativeMethods.CreateObjectDelegate));
-
-                    if (createObject == null)
-                    {
-                        throw new SevenZipLibraryException();
-                    }
-
-                    object result;
-                    var interfaceId = typeof(IInArchive).GUID;
                     var classId = Formats.InFormatGuids[format];
 
                     try
                     {
-                        createObject(ref classId, ref interfaceId, out result);
+                        var archive = ComInterop.CreateInstance<IInArchive>(_modulePtr, classId);
+                        InitUserInFormat(user, format);
+                        _inArchives[user][format] = archive;
                     }
-                    catch (Exception)
+                    catch (Exception exception)
                     {
-                        throw new SevenZipLibraryException("Your 7-zip library does not support this archive type.");
+                        throw new SevenZipLibraryException(
+                            "Your 7-zip library does not support this archive type.",
+                            exception);
                     }
-
-                    InitUserInFormat(user, format);
-                    _inArchives[user][format] = result as IInArchive;
                 }
 
                 return _inArchives[user][format];
@@ -478,33 +452,23 @@ namespace SevenZip
             {
                 if (_outArchives[user][format] == null)
                 {
-#if NET472 || NETSTANDARD2_0
-                    var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-                    sp.Demand();
-#endif
                     if (_modulePtr == IntPtr.Zero)
                     {
                         throw new SevenZipLibraryException();
                     }
 
-                    var createObject = (NativeMethods.CreateObjectDelegate)
-                        Marshal.GetDelegateForFunctionPointer(
-                            NativeMethods.GetProcAddress(_modulePtr, "CreateObject"),
-                            typeof(NativeMethods.CreateObjectDelegate));
-                    var interfaceId = typeof(IOutArchive).GUID;
-
-
                     try
                     {
                         var classId = Formats.OutFormatGuids[format];
-                        createObject(ref classId, ref interfaceId, out var result);
-
+                        var archive = ComInterop.CreateInstance<IOutArchive>(_modulePtr, classId);
                         InitUserOutFormat(user, format);
-                        _outArchives[user][format] = result as IOutArchive;
+                        _outArchives[user][format] = archive;
                     }
-                    catch (Exception)
+                    catch (Exception exception)
                     {
-                        throw new SevenZipLibraryException("Your 7-zip library does not support this archive type.");
+                        throw new SevenZipLibraryException(
+                            "Your 7-zip library does not support this archive type.",
+                            exception);
                     }
                 }
 
@@ -514,18 +478,22 @@ namespace SevenZip
 
         public static void SetLibraryPath(string libraryPath)
         {
-            if (_modulePtr != IntPtr.Zero && !Path.GetFullPath(libraryPath).Equals(Path.GetFullPath(_libraryFileName), StringComparison.OrdinalIgnoreCase))
+            lock (SyncRoot)
             {
-                throw new SevenZipLibraryException($"can not change the library path while the library \"{_libraryFileName}\" is being used.");
-            }
+                if (_modulePtr != IntPtr.Zero && !Path.GetFullPath(libraryPath).Equals(Path.GetFullPath(_libraryFileName), StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new SevenZipLibraryException($"can not change the library path while the library \"{_libraryFileName}\" is being used.");
+                }
 
-            if (!File.Exists(libraryPath))
-            {
-                throw new SevenZipLibraryException($"can not change the library path because the file \"{libraryPath}\" does not exist.");
-            }
+                if (!File.Exists(libraryPath))
+                {
+                    throw new SevenZipLibraryException($"can not change the library path because the file \"{libraryPath}\" does not exist.");
+                }
 
-            _libraryFileName = libraryPath;
-            _features = null;
+                _libraryFileName = libraryPath;
+                _features = null;
+                _modifyCapable = null;
+            }
         }
     }
 #endif

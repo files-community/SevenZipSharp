@@ -4,12 +4,14 @@ namespace SevenZip
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Runtime.InteropServices.Marshalling;
 
 #if UNMANAGED
     /// <summary>
     /// Archive extraction callback to handle the process of unpacking files
     /// </summary>
-    internal sealed class ArchiveExtractCallback : CallbackBase, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
+    [GeneratedComClass]
+    internal sealed partial class ArchiveExtractCallback : CallbackBase, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
     {
         private List<uint> _actualIndexes;
         private IInArchive _archive;
@@ -224,9 +226,11 @@ namespace SevenZip
 
                     if (_actualIndexes == null || _actualIndexes.Contains(index))
                     {
-                        var data = new PropVariant();
-                        _archive.GetProperty(index, ItemPropId.Path, ref data);
-                        var entryName = NativeMethods.SafeCast(data, "");
+                        var entryName = NativeMethods.GetProperty(
+                            _archive,
+                            index,
+                            ItemPropId.Path,
+                            "");
 
                         #region Get entryName
 
@@ -270,12 +274,17 @@ namespace SevenZip
                             return 0;
                         }
 
-                        _archive.GetProperty(index, ItemPropId.IsDirectory, ref data);
-
-                        if (!NativeMethods.SafeCast(data, false))
+                        if (!NativeMethods.GetProperty(
+                            _archive,
+                            index,
+                            ItemPropId.IsDirectory,
+                            false))
                         {
-                            _archive.GetProperty(index, ItemPropId.LastWriteTime, ref data);
-                            var time = NativeMethods.SafeCast(data, DateTime.MinValue);
+                            var time = NativeMethods.GetProperty(
+                                _archive,
+                                index,
+                                ItemPropId.LastWriteTime,
+                                DateTime.MinValue);
                             
                             if (File.Exists(fileName))
                             {

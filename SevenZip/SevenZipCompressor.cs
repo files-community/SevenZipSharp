@@ -315,6 +315,8 @@ namespace SevenZip
                     var names = new List<IntPtr>(2 + CustomParameters.Count);
                     var values = new List<PropVariant>(2 + CustomParameters.Count);
 
+                    try
+                    {
 #if NET472 || NETSTANDARD2_0
                         var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                     sp.Demand();
@@ -443,17 +445,40 @@ namespace SevenZip
 
 #endregion
 
-                    var namesHandle = GCHandle.Alloc(names.ToArray(), GCHandleType.Pinned);
-                    var valuesHandle = GCHandle.Alloc(values.ToArray(), GCHandleType.Pinned);
+                    var namesHandle = default(GCHandle);
+                    var valuesHandle = default(GCHandle);
 
                     try
                     {
+                        namesHandle = GCHandle.Alloc(names.ToArray(), GCHandleType.Pinned);
+                        valuesHandle = GCHandle.Alloc(values.ToArray(), GCHandleType.Pinned);
                         setter?.SetProperties(namesHandle.AddrOfPinnedObject(), valuesHandle.AddrOfPinnedObject(), names.Count);
                     }
                     finally
                     {
-                        namesHandle.Free();
-                        valuesHandle.Free();
+                        if (namesHandle.IsAllocated)
+                        {
+                            namesHandle.Free();
+                        }
+
+                        if (valuesHandle.IsAllocated)
+                        {
+                            valuesHandle.Free();
+                        }
+                    }
+                    }
+                    finally
+                    {
+                        foreach (var name in names)
+                        {
+                            Marshal.FreeBSTR(name);
+                        }
+
+                        foreach (var value in values)
+                        {
+                            var valueToClear = value;
+                            valueToClear.Clear();
+                        }
                     }
 
                     break;

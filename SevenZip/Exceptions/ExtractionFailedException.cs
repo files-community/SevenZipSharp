@@ -3,12 +3,10 @@
 namespace SevenZip
 {
     using System;
-    using System.Runtime.Serialization;
 
     /// <summary>
     /// Exception class for ArchiveExtractCallback.
     /// </summary>
-    [Serializable]
     public class ExtractionFailedException : SevenZipException
     {
         /// <summary>

@@ -1,42 +1,41 @@
+[assembly: System.Runtime.CompilerServices.DisableRuntimeMarshalling]
+
 namespace SevenZip
 {
     using System;
     using System.Runtime.InteropServices;
 
 #if UNMANAGED
-    internal static class NativeMethods
+    internal static partial class NativeMethods
     {
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate int CreateObjectDelegate(
-            [In] ref Guid classID,
-            [In] ref Guid interfaceID,
-            [MarshalAs(UnmanagedType.Interface)] out object outObject);
-
 #if DESKTOP
-        [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
-        public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string fileName);
+        [LibraryImport("kernel32.dll", EntryPoint = "LoadLibraryW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        public static partial IntPtr LoadLibrary(string fileName);
 #else
-        [DllImport("api-ms-win-core-libraryloader-l2-1-0.dll", SetLastError = true, EntryPoint = "LoadPackagedLibrary")]
-        public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPWStr)] string libraryName, int reserved = 0);
+        [LibraryImport("api-ms-win-core-libraryloader-l2-1-0.dll", EntryPoint = "LoadPackagedLibrary", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+        public static partial IntPtr LoadLibrary(string libraryName, int reserved = 0);
 #endif
 
 #if DESKTOP
-        [DllImport("kernel32.dll")]
+        [LibraryImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool FreeLibrary(IntPtr hModule);
+        public static partial bool FreeLibrary(IntPtr hModule);
 #else
-        [DllImport("api-ms-win-core-libraryloader-l1-2-0.dll")]
+        [LibraryImport("api-ms-win-core-libraryloader-l1-2-0.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool FreeLibrary(IntPtr hModule);
+        public static partial bool FreeLibrary(IntPtr hModule);
 #endif
 
 #if DESKTOP
-        [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
-        public static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string procName);
+        [LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr GetProcAddress(IntPtr hModule, string procName);
 #else
-        [DllImport("api-ms-win-core-libraryloader-l1-2-0.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        public static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string procName);
+        [LibraryImport("api-ms-win-core-libraryloader-l1-2-0.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr GetProcAddress(IntPtr hModule, string procName);
 #endif
+
+        [LibraryImport("ole32.dll")]
+        public static partial int PropVariantClear(ref PropVariant propVariant);
 
         public static T SafeCast<T>(PropVariant var, T def)
         {
@@ -57,6 +56,21 @@ namespace SevenZip
             }
 
             return def;
+        }
+
+        public static T GetProperty<T>(IInArchive archive, uint index, ItemPropId property, T defaultValue)
+        {
+            var value = new PropVariant();
+
+            try
+            {
+                archive.GetProperty(index, property, ref value);
+                return SafeCast(value, defaultValue);
+            }
+            finally
+            {
+                value.Clear();
+            }
         }
     }
 #endif

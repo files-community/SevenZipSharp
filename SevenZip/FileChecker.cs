@@ -153,7 +153,7 @@
             {
                 stream.Seek(-1024, SeekOrigin.End);
                 var buf = new byte[1024];
-                stream.Read(buf, 0, 1024);
+                stream.ReadExactly(buf, 0, buf.Length);
                 var isTar = true;
 
                 for (var i = 0; i < 1024; i++)
